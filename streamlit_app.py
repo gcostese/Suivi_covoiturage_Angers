@@ -97,7 +97,7 @@ df_par_heure = df_filtered.groupby('heure').agg({
     'is_carpool': 'sum'            # Nombre de covoiturages
 }).reset_index()
 
-df_par_heure['taux_moyen_covoit'] = (df_par_heure['is_covoit'] / df_par_heure['total_passengers'].replace(0, 1)) * 100
+df_par_heure['taux_moyen_covoit'] = (df_par_heure['is_carpool'] / df_par_heure['total_passengers'].replace(0, 1)) * 100
 
 
 # Calcul des indicateurs clés
