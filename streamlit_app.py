@@ -15,6 +15,8 @@ st.set_page_config(
 def load_data(file_path):
     data = pd.read_parquet(file_path)
     data['datetime'] = pd.to_datetime(data['datetime'])
+    data['week'] = ~data['weekend']  # True si jour de semaine hors weekend, False sinon
+    data['working_day'] = ~data['holiday']  # True si jour ouvrable, False sinon
     data['is_carpool'] = data['total_passengers'] > 1
     data['type_vehicule'] = data['is_carpool'].map({True: 'Covoiturage', False: 'Solo'})
     return data
@@ -40,10 +42,17 @@ granularity = st.sidebar.selectbox(
 )
 
 # Filtre sur les jours ouvrables
+type_jour_semaine = st.sidebar.multiselect(
+    "Jour de semaine :",
+    options=df['week'].unique(),
+    default=df['week'].unique()
+)
+
+# Filtre sur les jours ouvrables
 type_jour = st.sidebar.multiselect(
-    "Type de jour :",
-    options=df['holiday'].unique(),
-    default=df['holiday'].unique()
+    "Jour ouvrage :",
+    options=df['working_day'].unique(),
+    default=df['working_day'].unique()
 )
 
 # --- AFFICHAGE ---
@@ -70,7 +79,7 @@ st.divider() # Petite ligne de séparation
 
 # --- TRAITEMENT DES DONNÉES ---
 # Filtrage par type de jour
-mask = df['holiday'].isin(type_jour)
+mask = (df['working_day'].isin(type_jour)) & (df['week'].isin(type_jour_semaine))
 df_filtered = df[mask].copy()
 
 df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
@@ -99,9 +108,9 @@ c4.metric("Occupation Moyenne", f"{avg_occup:.2f} pers/véh")
 st.divider()
 
 # Graphique principal
-st.subheader(f"Évolution temporelle (par {granularity.lower()})")
+st.subheader(f"Évolution temporelle")
 
-tab1, tab2 = st.tabs(["Taux de Covoiturage (%)", "Taux d'Occupation"])
+tab1, tab2 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation"])
 
 with tab1:
     fig_covoit = px.line(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
@@ -112,7 +121,7 @@ with tab1:
 with tab2:
     fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
                         title="Évolution de l'occupation moyenne",
-                        labels={'taux_occupation_moyen': 'Passagers / Véhicule'})
+                        labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule'})
     st.plotly_chart(fig_occup, use_container_width=True)
 
 # Aperçu des données agrégées
