@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import datetime as dt
 
 # ---- FONCTIONS UTILES ----
 # 1. Configuration de la page (Optionnel mais recommandé)
@@ -15,6 +16,7 @@ st.set_page_config(
 def load_data(file_path):
     data = pd.read_parquet(file_path)
     data['datetime'] = pd.to_datetime(data['datetime'])
+    data['heure'] = data['datetime'].dt.hour
     data['week'] = ~data['weekend']  # True si jour de semaine hors weekend, False sinon
     data['working_day'] = ~data['holiday']  # True si jour ouvrable, False sinon
     data['is_carpool'] = data['total_passengers'] > 1
@@ -87,6 +89,11 @@ df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
     'is_carpool': 'sum'                    # sum de booléens = nb de True (véhicules covoit)
 })
 
+df_par_heure = df_filtered.groupby('heure').agg({
+    'total_passengers': 'count',  # Nombre de véhicules
+    'is_carpool': 'sum'            # Nombre de covoiturages
+})
+
 # Nettoyage des noms de colonnes après agrégation
 df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
 
@@ -117,6 +124,19 @@ with tab1:
                          title="Évolution du taux de covoiturage",
                          labels={'taux_covoiturage': 'Taux (%)', 'datetime': 'Temps'})
     st.plotly_chart(fig_covoit, use_container_width=True)
+
+    fig_horaire = px.bar(
+        df_par_heure.reset_index(), 
+        x='heure', 
+        y='taux_moyen_covoit',
+        title="Taux de covoiturage moyen par heure",
+        labels={'heure': 'Heure de la journée', 'taux_moyen_covoit': 'Taux moyen (%)'},
+        color='taux_moyen_covoit',
+        color_continuous_scale='Viridis'
+    )
+    # Ajuster l'axe X pour voir toutes les heures
+    fig_horaire.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
+    st.plotly_chart(fig_horaire, use_container_width=True)
 
 with tab2:
     fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
