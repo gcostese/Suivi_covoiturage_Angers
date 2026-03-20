@@ -93,7 +93,7 @@ df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
 df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
 
 df_par_heure = df_filtered.groupby('heure').agg({
-    'total_passengers': ['count', 'sum'],  # count = nb véhicules, sum = nb personnes
+    'total_passengers': 'count', #['count', 'sum'],  # count = nb véhicules, sum = nb personnes
     'is_carpool': 'sum'            # Nombre de covoiturages
 }).reset_index()
 
