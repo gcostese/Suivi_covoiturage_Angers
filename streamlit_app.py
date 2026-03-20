@@ -89,13 +89,16 @@ df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
     'is_carpool': 'sum'                    # sum de booléens = nb de True (véhicules covoit)
 })
 
-df_par_heure = df_filtered.groupby('heure').agg({
-    'total_passengers': 'count',  # Nombre de véhicules
-    'is_carpool': 'sum'            # Nombre de covoiturages
-})
-
 # Nettoyage des noms de colonnes après agrégation
 df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
+
+df_par_heure = df_filtered.groupby('heure').agg({
+    'total_passengers': ['count', 'sum'],  # count = nb véhicules, sum = nb personnes
+    'is_carpool': 'sum'            # Nombre de covoiturages
+}).reset_index()
+
+df_par_heure['taux_moyen_covoit'] = (df_par_heure['is_covoit'] / df_par_heure['total_passengers'].replace(0, 1)) * 100
+
 
 # Calcul des indicateurs clés
 df_resampled['taux_covoiturage'] = (df_resampled['nb_covoit'] / df_resampled['nb_vehicules']) * 100
@@ -126,7 +129,7 @@ with tab1:
     st.plotly_chart(fig_covoit, use_container_width=True)
 
     fig_horaire = px.bar(
-        df_par_heure.reset_index(), 
+        df_par_heure, 
         x='heure', 
         y='taux_moyen_covoit',
         title="Taux de covoiturage moyen par heure",
