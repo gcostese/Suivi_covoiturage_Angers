@@ -50,7 +50,7 @@ type_jour_semaine = st.sidebar.multiselect(
 
 # Filtre sur les jours ouvrables
 type_jour = st.sidebar.multiselect(
-    "Jour ouvrage :",
+    "Jour ouvrable :",
     options=df['working_day'].unique(),
     default=df['working_day'].unique()
 )
