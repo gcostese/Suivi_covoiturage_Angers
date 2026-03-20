@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import plotly.express as px
 
 # ---- FONCTIONS UTILES ----
 # 1. Configuration de la page (Optionnel mais recommandé)
@@ -51,7 +51,7 @@ type_jour = st.sidebar.multiselect(
 st.title("🚀 Analyse des données de covoiturage sur Angers")
 st.write("Voici les premiers résultats extraits du projet.")
 
-st.markdown(f"Analyse basée sur **{len(df_filtered):,}** passages de véhicules.")
+st.markdown(f"Analyse basée sur **{len(df):,}** passages de véhicules.")
 
 # --- APERÇU DES DONNÉES ---
 st.subheader("👀 Aperçu du jeu de données")
@@ -85,41 +85,41 @@ df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
 df_resampled['taux_covoiturage'] = (df_resampled['nb_covoit'] / df_resampled['nb_vehicules']) * 100
 df_resampled['taux_occupation_moyen'] = df_resampled['total_personnes'] / df_resampled['nb_vehicules']
 
-
-
-
-
-
 # Métriques clés
-c1, c2, c3 = st.columns(3)
-total_v = len(df_filtered)
-covoit_v = df_filtered['is_covoit'].sum()
-perc_covoit = (covoit_v / total_v * 100) if total_v > 0 else 0
+c1, c2, c3, c4 = st.columns(4)
+total_v = df_resampled['nb_vehicules'].sum()
+total_c = df_resampled['nb_covoit'].sum()
+avg_occup = df_filtered['total_passengers'].mean()
 
-c1.metric("Total Véhicules", f"{total_v:,}")
-c2.metric("Véhicules en Covoiturage", f"{covoit_v:,}")
-c3.metric("Taux de Covoiturage", f"{perc_covoit:.1f}%")
+c1.metric("Véhicules Total", f"{total_v:,}")
+c2.metric("Véhicules Covoit.", f"{total_c:,}")
+c3.metric("Taux Covoit. Moyen", f"{(total_c/total_v)*100:.1f}%")
+c4.metric("Occupation Moyenne", f"{avg_occup:.2f} pers/véh")
+
+st.divider()
 
 # Graphique principal
-st.subheader(f"Évolution du trafic (par {granularity.lower()})")
-st.line_chart(df_grouped)
+st.subheader(f"Évolution temporelle (par {granularity.lower()})")
+
+tab1, tab2 = st.tabs(["Taux de Covoiturage (%)", "Taux d'Occupation"])
+
+with tab1:
+    fig_covoit = px.line(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
+                         title="Évolution du taux de covoiturage",
+                         labels={'taux_covoiturage': 'Taux (%)', 'datetime': 'Temps'})
+    st.plotly_chart(fig_covoit, use_container_width=True)
+
+with tab2:
+    fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
+                        title="Évolution de l'occupation moyenne",
+                        labels={'taux_occupation_moyen': 'Passagers / Véhicule'})
+    st.plotly_chart(fig_occup, use_container_width=True)
 
 # Aperçu des données agrégées
-with st.expander("Voir le tableau des données agrégées"):
-    st.dataframe(df_grouped, use_container_width=True)
+with st.expander("Voir les données agrégées"):
+    st.dataframe(df_resampled)
 
-# Statistiques Min/Max sur la période
-st.subheader("📍 Extrêmes de la période")
-if not df_grouped.empty:
-    total_col = df_grouped.sum(axis=1) if show_covoit_split else df_grouped['Total Véhicules']
-    max_val = total_col.max()
-    max_time = total_col.idxmax()
-    min_val = total_col.min()
-    min_time = total_col.idxmin()
-    
-    col_a, col_b = st.columns(2)
-    col_a.info(f"**Pic d'affluence :** {max_val} véhicules le {max_time.strftime('%d/%m à %Hh')}")
-    col_b.info(f"**Minimum de trafic :** {min_val} véhicules le {min_time.strftime('%d/%m à %Hh')}")
+
 
 # Bouton d'action
 if st.button("Célébrer le déploiement !"):
