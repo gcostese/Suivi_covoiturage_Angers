@@ -75,7 +75,7 @@ df_filtered = df[mask].copy()
 
 df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
     'total_passengers': ['count', 'sum'], # count = nb véhicules, sum = nb personnes
-    'is_covoit': 'sum'                    # sum de booléens = nb de True (véhicules covoit)
+    'is_carpool': 'sum'                    # sum de booléens = nb de True (véhicules covoit)
 })
 
 # Nettoyage des noms de colonnes après agrégation
