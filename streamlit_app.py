@@ -78,7 +78,7 @@ with st.expander("ℹ️ À propos de ce projet", expanded=True):
         """)
     with col_img:
         # Remplace l'URL par une image réelle du capteur ou du site si disponible
-        st.image("https://www.cerema.fr/sites/default/files/styles/dossier_liens_images/public/images/2021/03/cerema_logo_rvb.png", width=150)
+        st.image("https://cerema.app.box.com/v/Kit-Logo-Cerema/file/1821929713512", width=150)
 
 
 st.write("Voici les premiers résultats extraits du projet.")
