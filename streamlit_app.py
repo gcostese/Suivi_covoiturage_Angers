@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -38,6 +39,8 @@ except FileNotFoundError:
 # Sidebar pour les filtres
 st.sidebar.header("Filtres")
 
+st.sidebar.image("BlocMarque_RF-Cerema_horizontal.jpg", caption='Logo du Cerema', use_container_width=True)
+
 # Choix de la maille temporelle
 granularity = st.sidebar.selectbox(
     "Fréquence de regroupement :",
@@ -74,11 +77,14 @@ with st.expander("ℹ️ À propos de ce projet", expanded=True):
         * Alimenter l'**[Observatoire National du Covoiturage au Quotidien](https://observatoire.covoiturage.gouv.fr/)**.
         * Comparer ces performances avec d'autres sites instrumentés en France.
         
-        📍 **Localisation :** [Voir sur Google Street View](https://maps.app.goo.gl/jFscxgeSwcsrVd9L9)
+        📍 **Localisation :** st.link_button("📍 Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/jFscxgeSwcsrVd9L9")
         """)
     with col_img:
-        # Remplace l'URL par une image réelle du capteur ou du site si disponible
-        st.image("BlocMarque_RF-Cerema_horizontal.jpg", width=150)
+        map_html = """
+        <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
+        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        """
+        components.html(map_html, height=450)
 
 
 st.write("Voici les premiers résultats extraits du projet.")
