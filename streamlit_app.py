@@ -121,6 +121,11 @@ df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
 # Nettoyage des noms de colonnes après agrégation
 df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
 
+df_pers = df_filtered.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule']).agg({
+    'total_passengers': 'sum'
+}).reset_index()
+df_pers.columns = ['datetime', 'Type de flux', 'Nombre de personnes']
+
 df_par_heure = df_filtered.groupby('heure').agg({
     'total_passengers': 'count', #['count', 'sum'],  # count = nb véhicules, sum = nb personnes
     'is_carpool': 'sum'            # Nombre de covoiturages
@@ -159,7 +164,7 @@ c4.metric("Occupation Moyenne", f"{avg_occup:.2f} pers/véh")
 
 st.divider()
 
-st.subheader("📊 Distribution de l'occupation")
+st.subheader("📊 Distribution du taux d'occupation des véhicules")
 # On utilise df_filtered pour garder la précision par véhicule
 fig_hist = px.histogram(
     df_filtered, 
@@ -170,6 +175,15 @@ fig_hist = px.histogram(
     labels={'total_passengers': 'Nombre d\'occupants', 'count': 'Nombre de véhicules'},
     category_orders={"total_passengers": [1, 2, 3, 4, 5]}
 )
+fig_hist.update_layout(
+    xaxis=dict(
+        tickmode='linear',
+        tick0=1,
+        dtick=1,
+        range=[0.5, 5.5] # Pour cadrer proprement de 1 à 5
+    ),
+    bargap=0.4 # Ajuste la largeur des barres pour un look plus aéré
+)
 st.plotly_chart(fig_hist, use_container_width=True)
 
 st.divider()
@@ -177,7 +191,7 @@ st.divider()
 # Graphique principal
 st.subheader(f"Graphiques")
 
-tab1, tab2, tab3, tab4 = st.tabs(["Volume de véhicules", "Taux de covoiturage (%)", "Taux d'occupation", "Profil journalier"])
+tab1, tab2, tab3, tab4 = st.tabs(["Volume de véhicules", "Taux de covoiturage", "Taux d'occupation des véhicules", "Profil moyen journalier"])
 
 with tab1:
     fig_combinee = px.line(
@@ -192,12 +206,40 @@ with tab1:
     )
     st.plotly_chart(fig_combinee, use_container_width=True)
 
+    fig_pers = px.line(
+        df_pers, 
+        x='datetime', 
+        y='Nombre de personnes', 
+        color='Type de flux',
+        title="Chronique du nombre de personnes transportées par heure",
+        line_shape='spline', # Pour l'effet lissé de votre image
+        color_discrete_map={
+            'Solo': '#636EFA',       # Bleu (identique à nb_vehicules)
+            'Covoiturage': '#00CC96' # Vert (identique à nb_covoit)
+        }
+    )
+    fig_pers.update_layout(
+        xaxis_title="Temps",
+        yaxis_title="Nombre de personnes",
+        legend_title="Type d'occupation",
+        hovermode="x unified" # Pour voir les deux valeurs en même temps au survol
+    )
+
+    st.plotly_chart(fig_pers, use_container_width=True)
+
 with tab2:
     fig_covoit = px.area(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
                          title="Évolution du taux de covoiturage",
                          labels={'taux_covoiturage': 'Taux (%)', 'datetime': 'Temps'})
     st.plotly_chart(fig_covoit, use_container_width=True)
 
+with tab3:
+    fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
+                        title="Évolution de l'occupation moyenne",
+                        labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule', 'datetime': 'Temps'})
+    st.plotly_chart(fig_occup, use_container_width=True)
+
+with tab4:
     fig_horaire = px.bar(
         df_par_heure, 
         x='heure', 
@@ -211,13 +253,7 @@ with tab2:
     fig_horaire.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
     st.plotly_chart(fig_horaire, use_container_width=True)
 
-with tab3:
-    fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
-                        title="Évolution de l'occupation moyenne",
-                        labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule', 'datetime': 'Temps'})
-    st.plotly_chart(fig_occup, use_container_width=True)
 
-with tab4:
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
         go.Bar(
@@ -286,13 +322,13 @@ with tab4:
             y=df_occup_debit['debit_moyen'],
             name="Débit moyen (veh/h)",
             mode='lines+markers',
-            line=dict(color='red', width=2),
-            marker=dict(size=6, symbol='circle', color='red', line=dict(color='white', width=1))
+            line=dict(color='Red', width=2),
+            marker=dict(size=8)
         ),
         secondary_y=True,
     )
     fig2.update_layout(
-        title_text="Occupation moyenne vs Débit horaire",
+        title_text="Taux d'occupation moyen des véhicules et débit horaire",
         xaxis=dict(tickmode='linear', tick0=0, dtick=1, range=[-0.5, 23.5]),
         plot_bgcolor='rgba(0,0,0,0)', # Fond transparent pour ressembler à l'image
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
