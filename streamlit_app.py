@@ -140,6 +140,11 @@ df_evolution = df_resampled.reset_index().melt(
     value_name='Nombre de véhicules'
 )
 
+df_occup_debit = df_filtered.groupby('heure').agg({
+    'total_passengers': ['mean', 'count'] # mean = occupation moy, count = débit
+}).reset_index()
+df_occup_debit.columns = ['heure', 'occupation_moy', 'debit_moyen']
+
 
 # Métriques clés
 c1, c2, c3, c4 = st.columns(4)
@@ -170,7 +175,7 @@ st.plotly_chart(fig_hist, use_container_width=True)
 st.divider()
 
 # Graphique principal
-st.subheader(f"Évolution temporelle")
+st.subheader(f"Graphiques")
 
 tab1, tab2, tab3, tab4 = st.tabs(["Volume de véhicules", "Taux de covoiturage (%)", "Taux d'occupation", "Profil journalier"])
 
@@ -251,10 +256,50 @@ with tab4:
         xaxis=dict(tickmode='linear', dtick=1),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
+    fig.update_xaxes(
+        title_text="Heure de la journée",
+        tickmode='linear',
+        tick0=0,
+        dtick=1,
+        range=[-0.5, 23.5],
+        showgrid=False # Optionnel : pour nettoyer le fond si besoin
+    )
     fig.update_yaxes(title_text="Nombre de véhicules", secondary_y=False)
     fig.update_yaxes(title_text="Taux de covoiturage (%)", secondary_y=True, range=[0, 100])
     st.plotly_chart(fig, use_container_width=True)
 
+    fig2 = make_subplots(specs=[[{"secondary_y": True}]])
+    fig2.add_trace(
+        go.Bar(
+            x=df_occup_debit['heure'],
+            y=df_occup_debit['occupation_moy'],
+            name="Taux d'occupation moyen",
+            marker_color='#3274A1',
+            text=df_occup_debit['occupation_moy'].round(2),
+            textposition='outside'
+        ),
+        secondary_y=False,
+    )
+    fig2.add_trace(
+        go.Scatter(
+            x=df_occup_debit['heure'],
+            y=df_occup_debit['debit_moyen'],
+            name="Débit moyen (veh/h)",
+            mode='lines+markers',
+            line=dict(color='red', width=2),
+            marker=dict(size=6, symbol='circle', color='red', line=dict(color='white', width=1))
+        ),
+        secondary_y=True,
+    )
+    fig2.update_layout(
+        title_text="Occupation moyenne vs Débit horaire",
+        xaxis=dict(tickmode='linear', tick0=0, dtick=1, range=[-0.5, 23.5]),
+        plot_bgcolor='rgba(0,0,0,0)', # Fond transparent pour ressembler à l'image
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    fig2.update_yaxes(title_text="Taux d'occupation moyen", range=[1.0, 1.8], secondary_y=False)
+    fig2.update_yaxes(title_text="Débit moyen (veh/h)", secondary_y=True)
+    st.plotly_chart(fig2, use_container_width=True)
 
 # Aperçu des données agrégées
 with st.expander("Voir les données agrégées"):
