@@ -36,10 +36,11 @@ except FileNotFoundError:
 
 
 # ---- PARAMETRAGE ----
+st.sidebar.image("BlocMarque_RF-Cerema_horizontal.jpg", use_container_width=True)
+
+
 # Sidebar pour les filtres
 st.sidebar.header("Filtres")
-
-st.sidebar.image("BlocMarque_RF-Cerema_horizontal.jpg", caption='Logo du Cerema', use_container_width=True)
 
 # Choix de la maille temporelle
 granularity = st.sidebar.selectbox(
@@ -79,11 +80,11 @@ with st.expander("ℹ️ À propos de ce projet", expanded=True):
         
         📍 **Localisation :**
         """)
-        st.link_button("📍 Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/jFscxgeSwcsrVd9L9")
+        st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
     with col_img:
         map_html = """
         <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
-        width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         """
         components.html(map_html, height=450)
 
@@ -171,7 +172,7 @@ st.divider()
 # Graphique principal
 st.subheader(f"Évolution temporelle")
 
-tab1, tab2, tab3, tab4 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation", "Titre à trouver"])
+tab1, tab2, tab3, tab4 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation", "Graphique double", "Titre à trouver"])
 
 with tab1:
     fig_covoit = px.line(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
