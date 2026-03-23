@@ -91,6 +91,8 @@ with st.expander("ℹ️ À propos de ce projet", expanded=True):
 
 st.write("Voici les premiers résultats extraits du projet.")
 
+st.image("cd_42840474_animation.gif", caption="Exemple de véhicule détecté par le capteur (Crédit : Cerema)")
+
 # --- APERÇU DES DONNÉES ---
 st.subheader("👀 Aperçu du jeu de données")
 
