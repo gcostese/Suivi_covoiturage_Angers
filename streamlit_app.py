@@ -121,10 +121,12 @@ df_resampled = df_filtered.set_index('datetime').resample(granularity).agg({
 # Nettoyage des noms de colonnes après agrégation
 df_resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
 
-df_pers = df_filtered.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule']).agg({
+df_stats = df_filtered.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule']).agg({
     'total_passengers': 'sum'
-}).reset_index()
-df_pers.columns = ['datetime', 'Type de flux', 'Nombre de personnes']
+}).unstack(fill_value=0)
+df_stats.columns = ['Covoiturage', 'Solo']
+df_stats['Total'] = df_stats['Covoiturage'] + df_stats['Solo']
+df_stats = df_stats.reset_index()
 
 df_par_heure = df_filtered.groupby('heure').agg({
     'total_passengers': 'count', #['count', 'sum'],  # count = nb véhicules, sum = nb personnes
@@ -206,26 +208,36 @@ with tab1:
     )
     st.plotly_chart(fig_combinee, use_container_width=True)
 
-    fig_pers = px.line(
-        df_pers, 
-        x='datetime', 
-        y='Nombre de personnes', 
-        color='Type de flux',
-        title="Chronique du nombre de personnes transportées par heure",
-        line_shape='spline', # Pour l'effet lissé de votre image
-        color_discrete_map={
-            'Solo': '#636EFA',       # Bleu (identique à nb_vehicules)
-            'Covoiturage': '#00CC96' # Vert (identique à nb_covoit)
-        }
-    )
-    fig_pers.update_layout(
+    fig_total = go.Figure()
+    # Courbe Solo (Bleu)
+    fig_total.add_trace(go.Scatter(
+        x=df_stats['datetime'], y=df_stats['Solo'],
+        name="Personnes en Solo",
+        line=dict(color='#636EFA', width=2),
+        mode='lines'
+    ))
+    # Courbe Covoiturage (Vert)
+    fig_total.add_trace(go.Scatter(
+        x=df_stats['datetime'], y=df_stats['Covoiturage'],
+        name="Personnes en Covoiturage",
+        line=dict(color='#00CC96', width=2),
+        mode='lines'
+    ))
+    # Courbe Total (Gris ou Noir, Pointillés)
+    fig_total.add_trace(go.Scatter(
+        x=df_stats['datetime'], y=df_stats['Total'],
+        name="Total Personnes Transportées",
+        line=dict(color='#2C3E50', width=3, dash='dot'), # Dash 'dot' pour distinguer le total
+        mode='lines'
+    ))
+    fig_total.update_layout(
+        title="Chronique du transport de personnes : Solo vs Covoiturage vs Total",
         xaxis_title="Temps",
         yaxis_title="Nombre de personnes",
-        legend_title="Type d'occupation",
-        hovermode="x unified" # Pour voir les deux valeurs en même temps au survol
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
-
-    st.plotly_chart(fig_pers, use_container_width=True)
+    st.plotly_chart(fig_total, use_container_width=True)
 
 with tab2:
     fig_covoit = px.area(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
