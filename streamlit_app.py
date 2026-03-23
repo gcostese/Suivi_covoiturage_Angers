@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import datetime as dt
 
 # ---- FONCTIONS UTILES ----
@@ -60,6 +62,25 @@ type_jour = st.sidebar.multiselect(
 # --- AFFICHAGE ---
 
 st.title("🚀 Analyse des données de covoiturage sur Angers")
+
+with st.expander("ℹ️ À propos de ce projet", expanded=True):
+    col_text, col_img = st.columns([2, 1])
+    with col_text:
+        st.markdown("""
+        Ce tableau de bord présente les données issues d'un **capteur de covoiturage** déployé par le **Cerema** sur la **D523 à Angers**.
+        
+        **Objectifs :**
+        * Suivre l'évolution des pratiques de mobilité sur cet axe structurant.
+        * Alimenter l'**[Observatoire National du Covoiturage au Quotidien](https://observatoire.covoiturage.gouv.fr/)**.
+        * Comparer ces performances avec d'autres sites instrumentés en France.
+        
+        📍 **Localisation :** [Voir sur Google Street View](https://maps.app.goo.gl/jFscxgeSwcsrVd9L9)
+        """)
+    with col_img:
+        # Remplace l'URL par une image réelle du capteur ou du site si disponible
+        st.image("https://www.cerema.fr/sites/default/files/styles/dossier_liens_images/public/images/2021/03/cerema_logo_rvb.png", width=150)
+
+
 st.write("Voici les premiers résultats extraits du projet.")
 
 st.markdown(f"Analyse basée sur **{len(df):,}** passages de véhicules.")
@@ -99,10 +120,18 @@ df_par_heure = df_filtered.groupby('heure').agg({
 
 df_par_heure['taux_moyen_covoit'] = (df_par_heure['is_carpool'] / df_par_heure['total_passengers'].replace(0, 1)) * 100
 
-
 # Calcul des indicateurs clés
 df_resampled['taux_covoiturage'] = (df_resampled['nb_covoit'] / df_resampled['nb_vehicules']) * 100
 df_resampled['taux_occupation_moyen'] = df_resampled['total_personnes'] / df_resampled['nb_vehicules']
+
+# Préparation des données pour la courbe combinée
+df_evolution = df_resampled.reset_index().melt(
+    id_vars='datetime', 
+    value_vars=['nb_vehicules', 'nb_covoit'],
+    var_name='Type de flux', 
+    value_name='Nombre de véhicules'
+)
+
 
 # Métriques clés
 c1, c2, c3, c4 = st.columns(4)
@@ -117,10 +146,25 @@ c4.metric("Occupation Moyenne", f"{avg_occup:.2f} pers/véh")
 
 st.divider()
 
+st.subheader("📊 Distribution de l'occupation")
+# On utilise df_filtered pour garder la précision par véhicule
+fig_hist = px.histogram(
+    df_filtered, 
+    x='total_passengers', 
+    color='type_vehicule',
+    barmode='group',
+    title="Nombre de personnes par véhicule (Répartition)",
+    labels={'total_passengers': 'Nombre d\'occupants', 'count': 'Nombre de véhicules'},
+    category_orders={"total_passengers": [1, 2, 3, 4, 5]}
+)
+st.plotly_chart(fig_hist, use_container_width=True)
+
+st.divider()
+
 # Graphique principal
 st.subheader(f"Évolution temporelle")
 
-tab1, tab2 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation"])
+tab1, tab2, tab3, tab4 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation", "Titre à trouver"])
 
 with tab1:
     fig_covoit = px.line(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
@@ -146,6 +190,59 @@ with tab2:
                         title="Évolution de l'occupation moyenne",
                         labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule'})
     st.plotly_chart(fig_occup, use_container_width=True)
+with tab3:
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    fig.add_trace(
+        go.Bar(
+            x=df_par_heure['heure'],
+            y=df_par_heure['is_carpool'],
+            name="Covoiturage",
+            marker_color='#E67E22' # Orange
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Bar(
+            x=df_par_heure['heure'],
+            y=df_par_heure['total_passengers'] - df_par_heure['is_carpool'],
+            name="Autosolistes",
+            marker_color='#3498DB' # Bleu
+        ),
+        secondary_y=False,
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=df_par_heure['heure'],
+            y=df_par_heure['taux_moyen_covoit'],
+            name="Taux de covoiturage (%)",
+            mode='lines+markers+text',
+            text=[f"{val:.0f}%" for val in df_par_heure['taux_moyen_covoit']],
+            textposition="top center",
+            line=dict(color='Red', width=2),
+            marker=dict(size=8)
+        ),
+        secondary_y=True,
+    )
+    fig.update_layout(
+        title_text="Répartition horaire et taux de covoiturage",
+        barmode='stack', # Pour empiler les barres bleu et orange
+        xaxis=dict(tickmode='linear', dtick=1),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    fig.update_yaxes(title_text="Nombre de véhicules", secondary_y=False)
+    fig.update_yaxes(title_text="Taux de covoiturage (%)", secondary_y=True, range=[0, 100])
+    st.plotly_chart(fig, use_container_width=True)
+with tab4:
+    fig_combinee = px.line(
+        df_evolution, 
+        x='datetime', 
+        y='Nombre de véhicules', 
+        color='Type de flux',
+        title="Chronique du trafic : Global vs Covoiturage",
+        line_shape='spline', # Pour des courbes plus lisses
+        color_discrete_map={'nb_vehicules': '#636EFA', 'nb_covoit': '#00CC96'}
+    )
+    st.plotly_chart(fig_combinee, use_container_width=True)
 
 # Aperçu des données agrégées
 with st.expander("Voir les données agrégées"):
