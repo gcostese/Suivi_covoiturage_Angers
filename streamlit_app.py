@@ -208,32 +208,35 @@ with tab1:
         line_shape='spline', # Pour des courbes plus lisses
         color_discrete_map={'nb_vehicules': '#636EFA', 'nb_covoit': '#00CC96'}
     )
+    fig_combinee.update_layout(
+        hovermode="x unified"
+    )
     st.plotly_chart(fig_combinee, use_container_width=True)
 
     fig_total = go.Figure()
-    # Courbe Solo (Bleu)
+    # Courbe Total (Bleu)
     fig_total.add_trace(go.Scatter(
-        x=df_stats['datetime'], y=df_stats['Solo'],
-        name="Personnes en Solo",
-        line=dict(color='#636EFA', width=2),
+        x=df_stats['datetime'], y=df_stats['Total'],
+        name="Total",
+        line=dict(color='#636EFA', width=1.5),
         mode='lines'
     ))
     # Courbe Covoiturage (Vert)
     fig_total.add_trace(go.Scatter(
         x=df_stats['datetime'], y=df_stats['Covoiturage'],
-        name="Personnes en Covoiturage",
+        name="Covoitureurs",
         line=dict(color='#00CC96', width=2),
         mode='lines'
     ))
-    # Courbe Total (Gris ou Noir, Pointillés)
+    # Courbe Solo (Rouge)
     fig_total.add_trace(go.Scatter(
-        x=df_stats['datetime'], y=df_stats['Total'],
-        name="Total Personnes Transportées",
-        line=dict(color='#2C3E50', width=1.5),
+        x=df_stats['datetime'], y=df_stats['Solo'],
+        name="Autosolistes",
+        line=dict(color="#FF0000", width=2),
         mode='lines'
     ))
     fig_total.update_layout(
-        title="Chronique du transport de personnes : Solo vs Covoiturage vs Total",
+        title="Nombre de personnes transportées : autosolistes vs covoitureurs",
         xaxis_title="Temps",
         yaxis_title="Nombre de personnes",
         hovermode="x unified"
