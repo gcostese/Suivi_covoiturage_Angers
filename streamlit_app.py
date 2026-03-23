@@ -91,10 +91,10 @@ with st.expander("ℹ️ À propos de ce projet", expanded=True):
 
 st.write("Voici les premiers résultats extraits du projet.")
 
-st.markdown(f"Analyse basée sur **{len(df):,}** passages de véhicules.")
-
 # --- APERÇU DES DONNÉES ---
 st.subheader("👀 Aperçu du jeu de données")
+
+st.markdown(f"Analyse basée sur **{len(df):,}** passages de véhicules.")
 
 tab1, tab2 = st.tabs(["Tableau complet", "Statistiques descriptives"])
 
@@ -172,10 +172,23 @@ st.divider()
 # Graphique principal
 st.subheader(f"Évolution temporelle")
 
-tab1, tab2, tab3, tab4 = st.tabs(["Taux de covoiturage (%)", "Taux d'occupation", "Graphique double", "Titre à trouver"])
+tab1, tab2, tab3, tab4 = st.tabs(["Volume de véhicules", "Taux de covoiturage (%)", "Taux d'occupation", "Profil journalier"])
 
 with tab1:
-    fig_covoit = px.line(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
+    fig_combinee = px.line(
+        df_evolution, 
+        x='datetime', 
+        y='Nombre de véhicules', 
+        color='Type de flux',
+        title="Chronique du trafic : total vs covoiturage",
+        labels={'datetime': 'Temps'},
+        line_shape='spline', # Pour des courbes plus lisses
+        color_discrete_map={'nb_vehicules': '#636EFA', 'nb_covoit': '#00CC96'}
+    )
+    st.plotly_chart(fig_combinee, use_container_width=True)
+
+with tab2:
+    fig_covoit = px.area(df_resampled.reset_index(), x='datetime', y='taux_covoiturage', 
                          title="Évolution du taux de covoiturage",
                          labels={'taux_covoiturage': 'Taux (%)', 'datetime': 'Temps'})
     st.plotly_chart(fig_covoit, use_container_width=True)
@@ -193,12 +206,13 @@ with tab1:
     fig_horaire.update_layout(xaxis=dict(tickmode='linear', tick0=0, dtick=1))
     st.plotly_chart(fig_horaire, use_container_width=True)
 
-with tab2:
+with tab3:
     fig_occup = px.area(df_resampled.reset_index(), x='datetime', y='taux_occupation_moyen',
                         title="Évolution de l'occupation moyenne",
-                        labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule'})
+                        labels={'taux_occupation_moyen': 'Nombre de personnes par véhicule', 'datetime': 'Temps'})
     st.plotly_chart(fig_occup, use_container_width=True)
-with tab3:
+
+with tab4:
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
         go.Bar(
@@ -240,17 +254,7 @@ with tab3:
     fig.update_yaxes(title_text="Nombre de véhicules", secondary_y=False)
     fig.update_yaxes(title_text="Taux de covoiturage (%)", secondary_y=True, range=[0, 100])
     st.plotly_chart(fig, use_container_width=True)
-with tab4:
-    fig_combinee = px.line(
-        df_evolution, 
-        x='datetime', 
-        y='Nombre de véhicules', 
-        color='Type de flux',
-        title="Chronique du trafic : Global vs Covoiturage",
-        line_shape='spline', # Pour des courbes plus lisses
-        color_discrete_map={'nb_vehicules': '#636EFA', 'nb_covoit': '#00CC96'}
-    )
-    st.plotly_chart(fig_combinee, use_container_width=True)
+
 
 # Aperçu des données agrégées
 with st.expander("Voir les données agrégées"):
