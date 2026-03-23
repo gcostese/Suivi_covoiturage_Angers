@@ -234,9 +234,9 @@ with tab1:
         title="Chronique du transport de personnes : Solo vs Covoiturage vs Total",
         xaxis_title="Temps",
         yaxis_title="Nombre de personnes",
-        hovermode="x unified",
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        hovermode="x unified"
     )
+    #legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     st.plotly_chart(fig_total, use_container_width=True)
 
 with tab2:
