@@ -227,7 +227,7 @@ with tab1:
     fig_total.add_trace(go.Scatter(
         x=df_stats['datetime'], y=df_stats['Total'],
         name="Total Personnes Transportées",
-        line=dict(color='#2C3E50', width=3),
+        line=dict(color='#2C3E50', width=1.5),
         mode='lines'
     ))
     fig_total.update_layout(
