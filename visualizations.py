@@ -100,17 +100,10 @@ def plot_pie_carpool(df):
     
     return fig
 
-def plot_evolution_flux(df_res):
+def plot_evolution_flux(df_evolution):
     """Chronique du trafic : total vs covoiturage."""
-    # Préparation des données pour le tracé
-    df_melt = df_res.reset_index().melt(
-        id_vars='datetime', 
-        value_vars=['Total', 'Covoitureurs'], 
-        var_name='Type de flux', 
-        value_name='Nombre'
-    )
     fig = px.line(
-        df_melt, x='datetime', y='Nombre', color='Type de flux',
+        df_evolution, x='datetime', y='Nombre', color='Type de flux',
         title="Chronique du trafic : total vs covoiturage",
         line_shape='spline',
         color_discrete_map={'nb_vehicules': COLORS['total'], 'nb_covoit': COLORS['covoit']}

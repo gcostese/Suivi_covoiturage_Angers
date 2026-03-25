@@ -171,7 +171,13 @@ def main():
 
     with tab_evol:
         # On prépare la donnée melt pour l'évolution
-        st.plotly_chart(viz.plot_evolution_flux(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        df_evolution = df_res.reset_index().melt(
+            id_vars='datetime', 
+            value_vars=['nb_vehicules', 'nb_covoit'],
+            var_name='Type de flux', 
+            value_name='Nombre de véhicules'
+        )
+        st.plotly_chart(viz.plot_evolution_flux(df_evolution), use_container_width=True, config=viz.PLOTLY_CONFIG)
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
