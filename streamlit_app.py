@@ -75,7 +75,7 @@ def render_header():
 
 def render_metrics(df_raw, df_f, df_res):
     st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{len(df_f):,}".replace(",", " ") + 
-                "** passages de véhicules légers (sur un total de {len(df_raw):,}".replace(",", " ") + ").")
+                f"** passages de véhicules légers (sur un total de {len(df_raw):,}".replace(",", " ") + ").")
     c1, c2, c3, c4 = st.columns(4)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
@@ -183,8 +183,7 @@ def main():
         st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True, config=viz.PLOTLY_CONFIG)
 
     with tab_week:
-        fig_heatmap = viz.plot_heatmap_covoiturage(df_f)
-        st.plotly_chart(fig_heatmap, use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
 
     # --- FOOTER ---
     # Aperçu des données agrégées

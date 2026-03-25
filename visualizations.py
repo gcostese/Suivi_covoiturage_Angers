@@ -188,7 +188,6 @@ def plot_occupancy_vs_flow(df_occup_debit):
 
 def plot_heatmap_covoiturage(df):
     """Génère un damier Heure vs Jour de la semaine pour le taux de covoiturage."""
-    
     # 1. Préparation des données : extraction du nom du jour
     df_heat = df.copy()
     df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
