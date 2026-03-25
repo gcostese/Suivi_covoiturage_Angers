@@ -25,7 +25,7 @@ PLOTLY_CONFIG = {
     }
 }
 
-def plot_sensor_map(lat=47.4784, lon=-0.5632):
+def plot_sensor_map(lat=47.463791, lon=-0.638287):
     """Génère une carte interactive Folium centrée sur le capteur."""
     # Création de la carte de base (fond clair pour la lisibilité)
     m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True, tiles="cartodbpositron")
