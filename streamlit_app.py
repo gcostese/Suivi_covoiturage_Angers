@@ -65,23 +65,24 @@ def render_header():
                 st_folium(m, width=400, height=200, key="angers_map")
             else:
                 st.error("Impossible de charger la carte.")
+                st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
         with col_img:
             map_html = """
             <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
             width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             """
             components.html(map_html, height=450)
-            st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
 
-def render_metrics(df_f, df_res):
-    st.markdown(f"Analyse basée sur **{len(df_f):,}** passages de véhicules.")
+def render_metrics(df_raw, df_f, df_res):
+    st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{len(df_f):,}".replace(",", " ") + 
+                "** passages de véhicules légers (sur un total de {len(df_raw):,}".replace(",", " ") + ").")
     c1, c2, c3, c4 = st.columns(4)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
-    c1.metric("Véhicules Total", f"{total_v:,}")
-    c2.metric("Véhicules Covoit.", f"{total_c:,}")
-    c3.metric("Taux Covoit.", f"{(total_c/total_v*100):.1f}%")
-    c4.metric("Occupation Moy.", f"{df_f['total_passengers'].mean():.2f}")
+    c1.metric("Nombre total de véhicules", f"{total_v:,}".replace(",", " "))
+    c2.metric("Nombre de véhicules en covoiturage", f"{total_c:,}".replace(",", " "))
+    c3.metric("Taux de covoiturage", f"{(total_c/total_v*100):.1f}%".replace(".", ","))
+    c4.metric("Taux d'occupation moyen", f"{df_f['total_passengers'].mean():.2f}".replace(".", ","))
 
 
 # --- FONCTION PRINCIPALE ---
@@ -144,8 +145,7 @@ def main():
     # --- APERÇU DES DONNÉES ---
     st.subheader("👀 Aperçu du jeu de données")
 
-    st.write("Voici les premiers résultats extraits du projet.")
-    render_metrics(df_f, df_res)
+    render_metrics(df_raw, df_f, df_res)
 
     tab1, tab2 = st.tabs(["Tableau complet", "Statistiques descriptives"])
 
@@ -160,7 +160,7 @@ def main():
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    tab_dist, tab_evol, tab_hour = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil Horaire"])
+    tab_dist, tab_evol, tab_hour, tab_week = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil Horaire", "🏁 Profil hebdomadaire"])
 
     with tab_dist:
         st.plotly_chart(viz.plot_histogram_occupancy(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
@@ -182,6 +182,10 @@ def main():
         df_occ_flow = df_hour.rename(columns={'occup_moy': 'occupation_moy', 'total_veh': 'debit_moyen'})
         st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True, config=viz.PLOTLY_CONFIG)
 
+    with tab_week:
+        fig_heatmap = viz.plot_heatmap_covoiturage(df_f)
+        st.plotly_chart(fig_heatmap, use_container_width=True, config=viz.PLOTLY_CONFIG)
+
     # --- FOOTER ---
     # Aperçu des données agrégées
     with st.expander("Voir les données agrégées"):
@@ -189,11 +193,6 @@ def main():
 
     with st.expander("💾 Exporter les données"):
         st.download_button("Télécharger les données filtrées (CSV)", df_f.to_csv(index=False), "data_angers.csv", "text/csv")
-
-    # Bouton d'action
-    if st.button("Célébrer le déploiement !"):
-        st.balloons()
-        st.success("L'appli fonctionne parfaitement !")
 
 if __name__ == "__main__":
     main()

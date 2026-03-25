@@ -185,3 +185,38 @@ def plot_occupancy_vs_flow(df_occup_debit):
     fig.update_yaxes(title_text="Pers/véhicule", range=[1.0, 1.8], secondary_y=False)
     fig.update_yaxes(title_text="Débit (veh/h)", secondary_y=True)
     return fig
+
+def plot_heatmap_covoiturage(df):
+    """Génère un damier Heure vs Jour de la semaine pour le taux de covoiturage."""
+    
+    # 1. Préparation des données : extraction du nom du jour
+    df_heat = df.copy()
+    df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
+    
+    # Ordonner les jours de la semaine correctement
+    jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    jours_traduits = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    
+    # 2. Pivot Table : Moyenne du taux (is_carpool * 100 pour avoir un %)
+    # On groupe par jour et par heure
+    pivot = df_heat.groupby(['jour_nom', 'heure'])['is_carpool'].mean().unstack() * 100
+    
+    # Réorganiser les lignes selon l'ordre des jours
+    pivot = pivot.reindex(jours_ordre)
+    pivot.index = jours_traduits # Traduction pour l'affichage
+    
+    # 3. Création du graphique
+    fig = px.imshow(
+        pivot,
+        labels=dict(x="Heure de la journée", y="Jour de la semaine", color="Taux (%)"),
+        x=pivot.columns,
+        y=pivot.index,
+        color_continuous_scale="RdYlGn", # Du rouge (bas) au vert (haut)
+        aspect="auto",
+        title="Intensité du covoiturage par période"
+    )
+    
+    fig.update_xaxes(dtick=1) # Afficher toutes les heures
+    fig.update_layout(coloraxis_colorbar=dict(title="%"))
+    
+    return fig
