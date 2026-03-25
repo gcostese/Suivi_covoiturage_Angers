@@ -75,8 +75,7 @@ def plot_histogram_occupancy_with_perc(df):
         xaxis=dict(tickmode='linear', dtick=1),
         yaxis=dict(title="Nombre de véhicules"),
         uniformtext_minsize=8, 
-        uniformtext_mode='hide', 
-        theme="streamlit"
+        uniformtext_mode='hide'
     )
     return fig
 
@@ -97,7 +96,7 @@ def plot_pie_carpool(df):
     )
     
     # Affichage des labels et pourcentages à l'intérieur
-    fig.update_traces(textinfo='percent+label', pull=[0, 0.1], theme="streamlit") 
+    fig.update_traces(textinfo='percent+label', pull=[0, 0.1]) 
     
     return fig
 
@@ -109,7 +108,7 @@ def plot_evolution_flux(df_evolution):
         line_shape='spline',
         color_discrete_map={'nb_vehicules': COLORS['total'], 'nb_covoit': COLORS['covoit']}
     )
-    fig.update_layout(hovermode="x unified", theme="streamlit")
+    fig.update_layout(hovermode="x unified")
     return fig
 
 def plot_stacked_persons(df_stats):
@@ -131,8 +130,7 @@ def plot_stacked_persons(df_stats):
         title="Nombre de personnes transportées : autosolistes vs covoitureurs",
         xaxis_title="Temps",
         yaxis_title="Nombre de personnes",
-        hovermode="x unified", 
-        theme="streamlit"
+        hovermode="x unified"
     )
     return fig
 
@@ -177,8 +175,7 @@ def plot_hourly_profile_mixed(df_par_heure):
         title_text="Répartition horaire et taux de covoiturage",
         barmode='stack',
         xaxis=dict(tickmode='linear', dtick=1, range=[-0.5, 23.5]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), 
-        theme="streamlit"
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     fig.update_yaxes(title_text="Nb véhicules", secondary_y=False)
     fig.update_yaxes(title_text="Taux (%)", secondary_y=True, range=[0, 100])
@@ -208,8 +205,7 @@ def plot_occupancy_vs_flow(df_occup_debit):
     fig.update_layout(
         title_text="Taux d'occupation moyen et débit horaire",
         xaxis=dict(tickmode='linear', dtick=1, range=[-0.5, 23.5]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1), 
-        theme="streamlit"
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
     fig.update_yaxes(title_text="Pers/véhicule", range=[1.0, 1.8], secondary_y=False)
     fig.update_yaxes(title_text="Débit (veh/h)", secondary_y=True)
@@ -245,6 +241,6 @@ def plot_heatmap_covoiturage(df):
     )
     
     fig.update_xaxes(dtick=1) # Afficher toutes les heures
-    fig.update_layout(coloraxis_colorbar=dict(title="%"), theme="streamlit")
+    fig.update_layout(coloraxis_colorbar=dict(title="%"))
     
     return fig

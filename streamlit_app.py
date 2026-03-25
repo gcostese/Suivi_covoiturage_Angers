@@ -165,9 +165,9 @@ def main():
     with tab_dist:
         col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(viz.plot_histogram_occupancy_with_perc(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
+            st.plotly_chart(viz.plot_histogram_occupancy_with_perc(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         with col2:
-            st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
+            st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_evol:
         # On prépare la donnée melt pour l'évolution
@@ -177,23 +177,23 @@ def main():
             var_name='Type de flux', 
             value_name='Nombre de véhicules'
         )
-        st.plotly_chart(viz.plot_evolution_flux(df_evolution), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_evolution_flux(df_evolution), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
         df_stats['Total'] = df_stats.sum(axis=1)
-        st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index()), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index()), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_hour:
         # Adaptation des noms pour viz.py
         df_hour_renamed = df_hour.rename(columns={'total_veh': 'total_passengers', 'nb_covoit': 'is_carpool', 'taux_covoit': 'taux_moyen_covoit'})
-        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_renamed), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_renamed), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         df_occ_flow = df_hour.rename(columns={'occup_moy': 'occupation_moy', 'total_veh': 'debit_moyen'})
-        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_week:
-        st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     # --- FOOTER ---
     # Aperçu des données agrégées
