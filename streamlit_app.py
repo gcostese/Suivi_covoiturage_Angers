@@ -47,7 +47,7 @@ def get_processed_data(df, working_days, week_days, granularity):
 def render_header():
     st.title("🚀 Analyse des données de covoiturage sur Angers")
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
-        col_text, col_map, col_img = st.columns([3, 1])
+        col_text, col_map, col_img = st.columns([2, 1, 1])
         with col_text:
             st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** déployé par le **Cerema** sur la **D523 à Angers**.
