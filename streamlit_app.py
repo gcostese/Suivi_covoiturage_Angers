@@ -63,7 +63,10 @@ def render_header():
         with col_img:
             # Affichage de la carte interactive
             m = viz.plot_sensor_map()
-            st_folium(m, width=500, height=300, scrolling=False)
+            if m:
+                st_folium(m, width=400, height=200, key="angers_map")
+            else:
+                st.error("Impossible de charger la carte.")
             
             map_html = """
             <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
