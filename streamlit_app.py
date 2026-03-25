@@ -160,10 +160,14 @@ def main():
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    tab_dist, tab_evol, tab_hour, tab_week = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil Horaire", "🏁 Profil hebdomadaire"])
+    tab_dist, tab_evol, tab_hour, tab_week = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil horaire", "🏁 Profil hebdomadaire"])
 
     with tab_dist:
-        st.plotly_chart(viz.plot_histogram_occupancy(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(viz.plot_histogram_occupancy_with_perc(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
+        with col2:
+            st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG)
 
     with tab_evol:
         # On prépare la donnée melt pour l'évolution

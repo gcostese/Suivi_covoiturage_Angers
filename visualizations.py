@@ -49,23 +49,55 @@ def plot_sensor_map(lat=47.463791, lon=-0.638287):
     
     return m
 
-def plot_histogram_occupancy(df):
-    """Distribution du nombre de personnes par véhicule."""
-    fig = px.histogram(
-        df, 
+def plot_histogram_occupancy_with_perc(df):
+    # 1. Pré-calcul des effectifs et pourcentages
+    stats = df.groupby(['total_passengers', 'type_vehicule']).size().reset_index(name='counts')
+    total = stats['counts'].sum()
+    stats['percentage'] = (stats['counts'] / total) * 100
+
+    # 2. Création du graphique
+    fig = px.bar(
+        stats, 
         x='total_passengers', 
+        y='counts', 
         color='type_vehicule',
         barmode='group',
-        title="Nombre de personnes par véhicule",
-        labels={'total_passengers': 'Nombre d\'occupants', 'count': 'Nombre de véhicules'},
-        category_orders={"total_passengers": [1, 2, 3, 4, 5]},
-        color_discrete_map={'Covoiturage': COLORS['covoit'], 'Autosolistes': COLORS['solo']}
+        text='percentage', # On définit le texte à afficher
+        title="Répartition des occupants (en % du total)",
+        labels={'total_passengers': 'Nombre d\'occupants', 'counts': 'Nombre de véhicules'},
+        color_discrete_map={'Covoiturage': '#00CC96', 'Solo': '#636EFA'}
     )
+
+    # 3. Formatage du texte (arrondi à 1 décimale + %)
+    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+    
     fig.update_layout(
-        xaxis=dict(tickmode='linear', tick0=1, dtick=1, range=[0.5, 5.5]),
-        bargap=0.4,
-        template="plotly_white"
+        xaxis=dict(tickmode='linear', dtick=1),
+        yaxis=dict(title="Nombre de véhicules"),
+        uniformtext_minsize=8, 
+        uniformtext_mode='hide'
     )
+    return fig
+
+def plot_pie_carpool(df):
+    """Génère un camembert du ratio Solo vs Covoiturage."""
+    # Préparation simple des données
+    stats = df['type_vehicule'].value_counts().reset_index()
+    stats.columns = ['Type', 'Valeur']
+
+    fig = px.pie(
+        stats, 
+        values='Valeur', 
+        names='Type',
+        title="Répartition globale du trafic",
+        color='Type',
+        color_discrete_map={'Covoiturage': '#00CC96', 'Solo': '#636EFA'},
+        hole=0.4 # Transforme le camembert en Donut pour plus de modernité
+    )
+    
+    # Affichage des labels et pourcentages à l'intérieur
+    fig.update_traces(textinfo='percent+label', pull=[0, 0.1]) 
+    
     return fig
 
 def plot_evolution_flux(df_res):
