@@ -152,7 +152,7 @@ def plot_hourly_profile_mixed(df_par_heure):
     # Barres empilées
     fig.add_trace(
         go.Bar(x=df_par_heure['heure'], y=df_par_heure['is_carpool'], 
-               name="Covoiturage", marker_color=COLORS['accent']),
+               name="Covoiturage", marker_color=COLORS['covoit']),
         secondary_y=False,
     )
     fig.add_trace(
