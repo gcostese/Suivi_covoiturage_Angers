@@ -65,7 +65,7 @@ def plot_histogram_occupancy_with_perc(df):
         text='percentage', # On définit le texte à afficher
         title="Répartition des occupants (en % du total)",
         labels={'total_passengers': 'Nombre d\'occupants', 'counts': 'Nombre de véhicules'},
-        color_discrete_map={'Covoiturage': '#00CC96', 'Solo': '#636EFA'}
+        color_discrete_map={'Covoiturage': COLORS['covoit'], 'Solo': COLORS['solo']}
     )
 
     # 3. Formatage du texte (arrondi à 1 décimale + %)
@@ -91,7 +91,7 @@ def plot_pie_carpool(df):
         names='Type',
         title="Répartition globale du trafic",
         color='Type',
-        color_discrete_map={'Covoiturage': '#00CC96', 'Solo': '#636EFA'},
+        color_discrete_map={'Covoiturage': COLORS['covoit'], 'Solo': COLORS['solo']},
         hole=0.4 # Transforme le camembert en Donut pour plus de modernité
     )
     
@@ -105,7 +105,7 @@ def plot_evolution_flux(df_res):
     # Préparation des données pour le tracé
     df_melt = df_res.reset_index().melt(
         id_vars='datetime', 
-        value_vars=['nb_vehicules', 'nb_covoit'], 
+        value_vars=['Total', 'Covoitureurs'], 
         var_name='Type de flux', 
         value_name='Nombre'
     )
@@ -113,7 +113,7 @@ def plot_evolution_flux(df_res):
         df_melt, x='datetime', y='Nombre', color='Type de flux',
         title="Chronique du trafic : total vs covoiturage",
         line_shape='spline',
-        color_discrete_map={'nb_vehicules': COLORS['solo'], 'nb_covoit': COLORS['covoit']}
+        color_discrete_map={'nb_vehicules': COLORS['total'], 'nb_covoit': COLORS['covoit']}
     )
     fig.update_layout(hovermode="x unified")
     return fig
