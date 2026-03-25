@@ -47,7 +47,7 @@ def get_processed_data(df, working_days, week_days, granularity):
 def render_header():
     st.title("🚀 Analyse des données de covoiturage sur Angers")
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
-        col_text, col_map, col_img = st.columns([2, 1, 1])
+        col_text, col_map, col_img = st.columns([1, 1, 1])
         with col_text:
             st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** déployé par le **Cerema** sur la **D523 à Angers**.
@@ -74,6 +74,7 @@ def render_header():
             st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
 
 def render_metrics(df_f, df_res):
+    st.markdown(f"Analyse basée sur **{len(df_f):,}** passages de véhicules.")
     c1, c2, c3, c4 = st.columns(4)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
@@ -130,18 +131,21 @@ def main():
 
     # --- AFFICHAGE ---
     render_header()
-    render_metrics(df_f, df_res)
     st.divider()
 
-    st.write("Voici les premiers résultats extraits du projet.")
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image("cd_42840474_animation.gif", 
+                 caption="Exemple de véhicule avec 4 occupants détectés par le capteur (Crédit : Cerema)",
+                 use_container_width=True)
 
-    st.image("cd_42840474_animation.gif", 
-             caption="Exemple de véhicule avec 4 occupants détectés par le capteur (Crédit : Cerema)")
+    st.divider()
 
     # --- APERÇU DES DONNÉES ---
     st.subheader("👀 Aperçu du jeu de données")
 
-    st.markdown(f"Analyse basée sur **{len(df_raw):,}** passages de véhicules.")
+    st.write("Voici les premiers résultats extraits du projet.")
+    render_metrics(df_f, df_res)
 
     tab1, tab2 = st.tabs(["Tableau complet", "Statistiques descriptives"])
 
