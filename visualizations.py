@@ -131,7 +131,7 @@ def plot_stacked_persons(df_stats):
     ))
     fig.add_trace(go.Scatter(
         x=df_stats['datetime'], y=df_stats['Solo'],
-        name="Autosolistes", line=dict(color="#FF4B4B", width=2)
+        name="Autosolistes", line=dict(color=COLORS['solo'], width=2)
     ))
     fig.update_layout(
         title="Nombre de personnes transportées : autosolistes vs covoitureurs",
