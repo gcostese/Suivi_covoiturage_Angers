@@ -47,7 +47,7 @@ def get_processed_data(df, working_days, week_days, granularity):
 def render_header():
     st.title("🚀 Analyse des données de covoiturage sur Angers")
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
-        col_text, col_img = st.columns([1, 1])
+        col_text, col_map, col_img = st.columns([3, 1])
         with col_text:
             st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** déployé par le **Cerema** sur la **D523 à Angers**.
@@ -56,23 +56,22 @@ def render_header():
             * Suivre l'évolution des pratiques de mobilité sur cet axe structurant.
             * Alimenter l'**[Observatoire National du Covoiturage au Quotidien](https://observatoire.covoiturage.gouv.fr/)**.
             * Comparer ces performances avec d'autres sites instrumentés en France.
-            
-            📍 **Localisation :**
             """)
-            st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
-        with col_img:
+        with col_map:
+            st.markdown("""📍 **Localisation :** """)
             # Affichage de la carte interactive
             m = viz.plot_sensor_map()
             if m:
                 st_folium(m, width=400, height=200, key="angers_map")
             else:
                 st.error("Impossible de charger la carte.")
-            
+        with col_img:
             map_html = """
             <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
             width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             """
             components.html(map_html, height=450)
+            st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
 
 def render_metrics(df_f, df_res):
     c1, c2, c3, c4 = st.columns(4)
