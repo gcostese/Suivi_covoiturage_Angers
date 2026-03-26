@@ -93,9 +93,9 @@ def render_header():
             components.html(map_html, height=450)
 
 def render_metrics(df_raw, df_f, df_res, nb_jours):
-    st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{fmt_fr(len(df_f))}" + 
-                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))})" +
-                f"sur une période de **{nb_jours}** jours.")
+    st.markdown(f"Voici les premiers résultats issus de l'analyse de **{fmt_fr(len(df_f))}**" + 
+                f" passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))})" +
+                f" pour une période de **{nb_jours}** jours.")
     c1, c2, c3, c4, c5 = st.columns(5)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()

@@ -230,7 +230,7 @@ def plot_occupancy_vs_flow(df_occup_debit):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="x unified"
     )
-    fig.update_yaxes(title_text="Pers/véhicule", range=[1.0, 1.8], secondary_y=False)
+    fig.update_yaxes(title_text="Pers/véhicule", range=[1.0, 2.0], secondary_y=False)
     fig.update_yaxes(title_text="Débit (veh/h)", secondary_y=True)
     return fig
 
