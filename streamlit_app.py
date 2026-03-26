@@ -277,9 +277,6 @@ def main():
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
     
     with tab_dist:
-        # ... vos graphiques existants ...
-        st.divider()
-        st.subheader("Analyse de la corrélation")
         st.plotly_chart(viz.plot_correlation_scatter(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     # --- FOOTER ---

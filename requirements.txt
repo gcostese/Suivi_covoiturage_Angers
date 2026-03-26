@@ -3,6 +3,7 @@ pandas
 datetime
 pyarrow
 plotly
+statsmodels
 folium
 streamlit-folium
 kaleido
