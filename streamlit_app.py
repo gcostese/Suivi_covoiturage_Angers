@@ -119,11 +119,12 @@ def main():
     st.sidebar.header("⚙️ Configuration")
 
     # Choix de la maille temporelle
-    granularity = st.sidebar.selectbox(
-        "Fréquence de regroupement :",
-        options=['H', 'D', 'W'], 
-        format_func=lambda x: {'H': 'Heure', 'D': 'Jour', 'W': 'Semaine'}[x]
-    )
+    granularity = 'H'
+    #granularity = st.sidebar.selectbox(
+    #    "Fréquence de regroupement :",
+    #    options=['H', 'D', 'W'], 
+    #    format_func=lambda x: {'H': 'Heure', 'D': 'Jour', 'W': 'Semaine'}[x]
+    #)
 
     selected_period_label = st.sidebar.selectbox(
         "Tranche horaire :",
@@ -136,7 +137,7 @@ def main():
     choix_semaine = st.sidebar.radio(
         "Type de jours :",
         ["Tous", "Semaine uniquement", "Week-end uniquement"],
-        horizontal=True
+        horizontal=False
     )
 
     mapping_semaine = {
@@ -149,14 +150,14 @@ def main():
     # Filtre sur les jours ouvrables
     choix_ouv = st.sidebar.radio(
         "Calendrier :",
-        ["Tous", "Jours ouvrés", "Fériés"],
-        horizontal=True
+        ["Tous", "Jours ouvrés", "Fériés ou vacances scolaires"],
+        horizontal=False
     )
 
     mapping_ouv = {
         "Tous": [True, False],
         "Jours ouvrés": [True],
-        "Fériés": [False]
+        "Fériés ou vacances scolaires": [False]
     }
     type_jour_ouv = mapping_ouv[choix_ouv]
 
