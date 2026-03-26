@@ -276,8 +276,17 @@ def main():
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
     
-    with tab_dist:
-        st.plotly_chart(viz.plot_correlation_scatter(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+    with tab_corr:
+        fig_corr = viz.plot_correlation_scatter(df_res)
+        # Extraire les résultats de la tendance
+        try:
+            import plotly.express as px
+            results = px.get_trendline_results(fig_corr)
+            r2 = results.iloc[0]["px_fit_results"].rsquared
+            st.metric("Coefficient de corrélation (R²)", f"{r2:.3f}")
+        except:
+            pass
+        st.plotly_chart(fig_corr, use_container_width=True)
 
     # --- FOOTER ---
     # Aperçu des données agrégées
