@@ -231,8 +231,14 @@ def main():
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
+        full_range = pd.date_range(start=df_stats.index.min(), end=df_stats.index.max(), freq=granularity)
+        df_stats = df_stats.reindex(full_range, fill_value=0)
         df_stats['Total'] = df_stats.sum(axis=1)
-        st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index()), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index().rename(columns={'index': 'datetime'})), 
+                        use_container_width=True, 
+                        config=viz.PLOTLY_CONFIG, 
+                        theme="streamlit"
+                        )
 
         st.divider()
         st.subheader("Évolution du taux de covoiturage")
