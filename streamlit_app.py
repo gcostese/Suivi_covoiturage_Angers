@@ -42,6 +42,8 @@ def get_processed_data(df, working_days, week_days, granularity):
     
     return df_f, resampled, hourly
 
+def fmt_fr(val, decimal=2):
+    return f"{val:,.{decimal}f}".replace(",", " ").replace(".", ",")
 
 # --- SECTIONS DE L'INTERFACE ---
 def render_header():
@@ -74,13 +76,13 @@ def render_header():
             components.html(map_html, height=450)
 
 def render_metrics(df_raw, df_f, df_res):
-    st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{len(df_f):,}".replace(",", " ") + 
-                f"** passages de véhicules légers (sur un total de {len(df_raw):,}".replace(",", " ") + ").")
+    st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{fmt_fr(len(df_f))}" + 
+                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))})")
     c1, c2, c3, c4 = st.columns(4)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
-    c1.metric("Nombre total de véhicules", f"{total_v:,}".replace(",", " "))
-    c2.metric("Nombre de véhicules en covoiturage", f"{total_c:,}".replace(",", " "))
+    c1.metric("Nombre total de véhicules", f"{fmt_fr(total_v)}")
+    c2.metric("Nombre de véhicules en covoiturage", f"{fmt_fr(total_c)}")
     c3.metric("Taux de covoiturage", f"{(total_c/total_v*100):.1f}%".replace(".", ","))
     c4.metric("Taux d'occupation moyen", f"{df_f['total_passengers'].mean():.2f}".replace(".", ","))
 
@@ -170,19 +172,20 @@ def main():
             st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_evol:
-        # On prépare la donnée melt pour l'évolution
-        df_evolution = df_res.reset_index().melt(
-            id_vars='datetime', 
-            value_vars=['nb_vehicules', 'nb_covoit'],
-            var_name='Type de flux', 
-            value_name='Nombre de véhicules'
-        )
-        st.plotly_chart(viz.plot_evolution_flux(df_evolution), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        st.plotly_chart(viz.plot_evolution_flux(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
         df_stats['Total'] = df_stats.sum(axis=1)
         st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index()), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+
+        st.divider()
+        st.subheader("Évolution du taux d'occupation")
+        st.plotly_chart(
+            viz.plot_rate_evolution(df_res, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Pers/Véh"),
+            use_container_width=True, 
+            theme="streamlit"
+        )
 
     with tab_hour:
         # Adaptation des noms pour viz.py
