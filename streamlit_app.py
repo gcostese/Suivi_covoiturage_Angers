@@ -19,7 +19,7 @@ def load_data(file_path):
 
 @st.cache_data
 def get_processed_data(df, working_days, week_days, granularity, selected_hours):
-    """Calcule toutes les agrégations nécessaires en une seule fois (Performance)."""
+    """Calcule toutes les agrégations nécessaires en une seule fois."""
     mask = (
         (df['working_day'].isin(working_days)) & 
         (df['week'].isin(week_days)) &
@@ -28,7 +28,8 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
     df_f = df[mask].copy()
     
     nb_jours = df_f['datetime'].dt.date.nunique()
-    if nb_jours == 0: nb_jours = 1
+    if nb_jours == 0:
+        nb_jours = 1
 
     # Évolution temporelle
     resampled = df_f.set_index('datetime').resample(granularity).agg({
