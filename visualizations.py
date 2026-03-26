@@ -267,3 +267,34 @@ def plot_heatmap_covoiturage(df):
     fig.update_layout(coloraxis_colorbar=dict(title="%"))
     
     return fig
+
+def plot_correlation_scatter(df_resampled):
+    """
+    Nuage de points : Total véhicules (x) vs Covoiturage (y).
+    df_resampled doit contenir 'nb_vehicules', 'nb_covoit' et une colonne pour le type de jour.
+    """
+    # On recrée une colonne lisible pour la légende
+    df_plot = df_resampled.copy()
+    df_plot['Type de jour'] = df_plot['week'].map({True: 'Semaine', False: 'Week-end'})
+    
+    fig = px.scatter(
+        df_plot, 
+        x='nb_vehicules', 
+        y='nb_covoit',
+        color='Type de jour',
+        trendline="ols", # ajoute une ligne de tendance pour voir la corrélation
+        title="Corrélation : Flux total vs Covoiturage",
+        labels={
+            'nb_vehicules': 'Nombre total de véhicules',
+            'nb_covoit': 'Nombre de véhicules en covoiturage',
+            'Type de jour': 'Période'
+        },
+        color_discrete_map={'Semaine': COLORS['solo'], 'Week-end': COLORS['accent']},
+        template="plotly_white"
+    )
+    
+    fig.update_layout(
+        hovermode="closest",
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)
+        )
+    return fig

@@ -34,9 +34,10 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
     # Évolution temporelle
     resampled = df_f.set_index('datetime').resample(granularity).agg({
         'total_passengers': ['count', 'sum'],
-        'is_carpool': 'sum'
+        'is_carpool': 'sum',
+        'week': 'first'
     })
-    resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit']
+    resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit', 'week']
     resampled['taux_covoiturage'] = (resampled['nb_covoit'] / resampled['nb_vehicules']) * 100
     resampled['taux_occupation_moyen'] = resampled['total_personnes'] / resampled['nb_vehicules']
     
@@ -216,7 +217,7 @@ def main():
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    tab_dist, tab_evol, tab_hour, tab_week = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil horaire", "🏁 Profil hebdomadaire"])
+    tab_dist, tab_evol, tab_hour, tab_week, tab_corr = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil horaire", "🏁 Profil hebdomadaire", "📊 Corrélation"])
 
     with tab_dist:
         col1, col2 = st.columns(2)
@@ -274,6 +275,12 @@ def main():
 
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+    
+    with tab_dist:
+        # ... vos graphiques existants ...
+        st.divider()
+        st.subheader("Analyse de la corrélation")
+        st.plotly_chart(viz.plot_correlation_scatter(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     # --- FOOTER ---
     # Aperçu des données agrégées
