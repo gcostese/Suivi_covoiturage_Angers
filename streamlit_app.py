@@ -18,9 +18,13 @@ def load_data(file_path):
     return data
 
 @st.cache_data
-def get_processed_data(df, working_days, week_days, granularity):
+def get_processed_data(df, working_days, week_days, granularity, selected_hours):
     """Calcule toutes les agrégations nécessaires en une seule fois (Performance)."""
-    mask = (df['working_day'].isin(working_days)) & (df['week'].isin(week_days))
+    mask = (
+        (df['working_day'].isin(working_days)) & 
+        (df['week'].isin(week_days)) &
+        (df['heure'].isin(selected_hours))
+    )
     df_f = df[mask].copy()
     
     # Évolution temporelle
@@ -92,6 +96,13 @@ def main():
     st.set_page_config(page_title="Mesure du covoiturage à Angers", 
                        page_icon="📊", 
                        layout="wide")
+    PERIODS = {
+        "Toute la journée": list(range(0, 24)),
+        "Pointe Matin (7h-9h)": [7, 8, 9],
+        "Creux Journée (10h-16h)": [10, 11, 12, 13, 14, 15],
+        "Pointe Soir (16h-19h)": [16, 17, 18],
+        "Nuit (19h-7h)": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+    }
     
     # ---- CHARGEMENT DES DONNÉES ----
     try:
@@ -114,22 +125,49 @@ def main():
         format_func=lambda x: {'H': 'Heure', 'D': 'Jour', 'W': 'Semaine'}[x]
     )
 
-    # Filtre sur les jours de semaine
-    type_jour_sem = st.sidebar.multiselect(
-        "Jour de semaine :",
-        options=df_raw['week'].unique(),
-        default=df_raw['week'].unique()
+    selected_period_label = st.sidebar.selectbox(
+        "Tranche horaire :",
+        options=list(PERIODS.keys()),
+        index=0
     )
+    selected_hours = PERIODS[selected_period_label]
+
+    # Filtre sur les jours de semaine
+    choix_semaine = st.sidebar.radio(
+        "Type de jours :",
+        ["Tous", "Semaine uniquement", "Week-end uniquement"],
+        horizontal=True
+    )
+
+    mapping_semaine = {
+        "Tous": [True, False],
+        "Semaine uniquement": [True],
+        "Week-end uniquement": [False]
+    }
+    type_jour_sem = mapping_semaine[choix_semaine]
 
     # Filtre sur les jours ouvrables
-    type_jour_ouv = st.sidebar.multiselect(
-        "Jour ouvrable :",
-        options=df_raw['working_day'].unique(),
-        default=df_raw['working_day'].unique()
+    choix_ouv = st.sidebar.radio(
+        "Calendrier :",
+        ["Tous", "Jours ouvrés", "Fériés"],
+        horizontal=True
     )
 
+    mapping_ouv = {
+        "Tous": [True, False],
+        "Jours ouvrés": [True],
+        "Fériés": [False]
+    }
+    type_jour_ouv = mapping_ouv[choix_ouv]
+
     # --- Calculs ---
-    df_f, df_res, df_hour = get_processed_data(df_raw, type_jour_ouv, type_jour_sem, granularity)
+    df_f, df_res, df_hour = get_processed_data(
+        df_raw, 
+        type_jour_ouv, 
+        type_jour_sem, 
+        granularity, 
+        selected_hours
+        )
 
 
     # --- AFFICHAGE ---
