@@ -258,7 +258,12 @@ def main():
         })
         
         st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_viz), use_container_width=True)
-        st.plotly_chart(viz.plot_occupancy_vs_flow(df_hour_viz), use_container_width=True)
+
+        df_occ_flow = df_hour.rename(columns={
+            'occup_moy': 'occupation_moy', 
+            'debit_moyen': 'debit_moyen'
+            })
+        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True)
 
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
