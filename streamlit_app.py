@@ -176,7 +176,7 @@ def main():
     type_jour_ouv = mapping_ouv[choix_ouv]
 
     # --- Calculs ---
-    df_f, df_res, df_hour = get_processed_data(
+    df_f, df_res, df_hour, nb_jours_select = get_processed_data(
         df_raw, 
         type_jour_ouv, 
         type_jour_sem, 
@@ -200,7 +200,7 @@ def main():
     # --- APERÇU DES DONNÉES ---
     st.subheader("👀 Aperçu du jeu de données")
 
-    render_metrics(df_raw, df_f, df_res)
+    render_metrics(df_raw, df_f, df_res, nb_jours_select)
 
     tab1, tab2 = st.tabs(["Tableau complet", "Statistiques descriptives"])
 
