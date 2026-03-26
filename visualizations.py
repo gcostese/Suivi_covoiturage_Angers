@@ -182,7 +182,8 @@ def plot_hourly_profile_mixed(df_par_heure):
         title_text="Répartition horaire et taux de covoiturage",
         barmode='stack',
         xaxis=dict(tickmode='linear', dtick=1, range=[-0.5, 23.5]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified"
     )
     fig.update_yaxes(title_text="Nb véhicules", secondary_y=False)
     fig.update_yaxes(title_text="Taux (%)", secondary_y=True, range=[0, 100])
@@ -212,7 +213,8 @@ def plot_occupancy_vs_flow(df_occup_debit):
     fig.update_layout(
         title_text="Taux d'occupation moyen et débit horaire",
         xaxis=dict(tickmode='linear', dtick=1, range=[-0.5, 23.5]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified"
     )
     fig.update_yaxes(title_text="Pers/véhicule", range=[1.0, 1.8], secondary_y=False)
     fig.update_yaxes(title_text="Débit (veh/h)", secondary_y=True)

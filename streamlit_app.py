@@ -42,7 +42,7 @@ def get_processed_data(df, working_days, week_days, granularity):
     
     return df_f, resampled, hourly
 
-def fmt_fr(val, decimal=2):
+def fmt_fr(val, decimal=0):
     return f"{val:,.{decimal}f}".replace(",", " ").replace(".", ",")
 
 # --- SECTIONS DE L'INTERFACE ---
