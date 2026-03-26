@@ -77,7 +77,7 @@ def render_header():
 
 def render_metrics(df_raw, df_f, df_res):
     st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{fmt_fr(len(df_f))}" + 
-                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))})")
+                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))}).")
     c1, c2, c3, c4 = st.columns(4)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
@@ -172,12 +172,21 @@ def main():
             st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_evol:
+        st.subheader("Chroniques des flux (de véhicules et de personnes)")
         st.plotly_chart(viz.plot_evolution_flux(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
         df_stats['Total'] = df_stats.sum(axis=1)
         st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index()), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+
+        st.divider()
+        st.subheader("Évolution du taux de covoiturage")
+        st.plotly_chart(
+            viz.plot_rate_evolution(df_res, 'taux_covoiturage', "Taux de covoiturage", "Pourcentage"),
+            use_container_width=True, 
+            theme="streamlit"
+        )
 
         st.divider()
         st.subheader("Évolution du taux d'occupation")
