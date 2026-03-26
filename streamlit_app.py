@@ -27,6 +27,9 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
     )
     df_f = df[mask].copy()
     
+    nb_jours = df_f['datetime'].dt.date.nunique()
+    if nb_jours == 0: nb_jours = 1
+
     # Évolution temporelle
     resampled = df_f.set_index('datetime').resample(granularity).agg({
         'total_passengers': ['count', 'sum'],
@@ -36,15 +39,24 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
     resampled['taux_covoiturage'] = (resampled['nb_covoit'] / resampled['nb_vehicules']) * 100
     resampled['taux_occupation_moyen'] = resampled['total_personnes'] / resampled['nb_vehicules']
     
-    # Profil horaire
+    # Profil horaire : on calcule la somme, puis on divise par le nombre de jours
     hourly = df_f.groupby('heure').agg({
-        'total_passengers': ['count', 'mean'],
+        'total_passengers': ['count', 'sum'], # count = nb vehicules
         'is_carpool': 'sum'
     }).reset_index()
-    hourly.columns = ['heure', 'total_veh', 'occup_moy', 'nb_covoit']
-    hourly['taux_covoit'] = (hourly['nb_covoit'] / hourly['total_veh']) * 100
     
-    return df_f, resampled, hourly
+    hourly.columns = ['heure', 'total_veh_cumul', 'total_pers_cumul', 'nb_covoit_cumul']
+    
+    # Normalisation par le nombre de jours pour obtenir une moyenne horaire
+    hourly['debit_moyen'] = hourly['total_veh_cumul'] / nb_jours
+    hourly['covoit_moyen'] = hourly['nb_covoit_cumul'] / nb_jours
+    hourly['autosolo_moyen'] = (hourly['total_veh_cumul'] - hourly['nb_covoit_cumul']) / nb_jours
+    
+    # Les taux restent inchangés car le ratio cumulé ou moyen est le même
+    hourly['taux_covoit'] = (hourly['nb_covoit_cumul'] / hourly['total_veh_cumul']) * 100
+    hourly['occup_moy'] = hourly['total_pers_cumul'] / hourly['total_veh_cumul']
+    
+    return df_f, resampled, hourly, nb_jours
 
 def fmt_fr(val, decimal=0):
     return f"{val:,.{decimal}f}".replace(",", " ").replace(".", ",")
@@ -79,16 +91,18 @@ def render_header():
             """
             components.html(map_html, height=450)
 
-def render_metrics(df_raw, df_f, df_res):
+def render_metrics(df_raw, df_f, df_res, nb_jours):
     st.markdown(f"Voici les premiers résultats issus de l'analyse sur **{fmt_fr(len(df_f))}" + 
-                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))}).")
-    c1, c2, c3, c4 = st.columns(4)
+                f"** passages de véhicules légers (sur un total de {fmt_fr(len(df_raw))})" +
+                f"sur une période de **{nb_jours}** jours.")
+    c1, c2, c3, c4, c5 = st.columns(5)
     total_v = len(df_f)
     total_c = df_res['nb_covoit'].sum()
     c1.metric("Nombre total de véhicules", f"{fmt_fr(total_v)}")
     c2.metric("Nombre de véhicules en covoiturage", f"{fmt_fr(total_c)}")
     c3.metric("Taux de covoiturage", f"{(total_c/total_v*100):.1f}%".replace(".", ","))
     c4.metric("Taux d'occupation moyen", f"{df_f['total_passengers'].mean():.2f}".replace(".", ","))
+    c5.metric("Nombre de jours analysés", f"{fmt_fr(nb_jours)}")
 
 
 # --- FONCTION PRINCIPALE ---
@@ -236,12 +250,15 @@ def main():
         )
 
     with tab_hour:
-        # Adaptation des noms pour viz.py
-        df_hour_renamed = df_hour.rename(columns={'total_veh': 'total_passengers', 'nb_covoit': 'is_carpool', 'taux_covoit': 'taux_moyen_covoit'})
-        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_renamed), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        df_hour_viz = df_hour.rename(columns={
+            'debit_moyen': 'total_passengers', # Pour plot_hourly_profile_mixed
+            'covoit_moyen': 'is_carpool', 
+            'taux_covoit': 'taux_moyen_covoit',
+            'occup_moy': 'occupation_moy'      # Pour plot_occupancy_vs_flow
+        })
         
-        df_occ_flow = df_hour.rename(columns={'occup_moy': 'occupation_moy', 'total_veh': 'debit_moyen'})
-        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_viz), use_container_width=True)
+        st.plotly_chart(viz.plot_occupancy_vs_flow(df_hour_viz), use_container_width=True)
 
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")

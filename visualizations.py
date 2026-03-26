@@ -199,7 +199,7 @@ def plot_hourly_profile_mixed(df_par_heure):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         hovermode="x unified"
     )
-    fig.update_yaxes(title_text="Nb véhicules", secondary_y=False)
+    fig.update_yaxes(title_text="Débit moyen (véh/h)", secondary_y=False)
     fig.update_yaxes(title_text="Taux (%)", secondary_y=True, range=[0, 100])
     return fig
 
