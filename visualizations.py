@@ -298,6 +298,24 @@ def plot_correlation_scatter(df_resampled):
         template="plotly_white"
     )
     
+    # --- AJOUT DE L'ÉQUATION DANS L'INFOBULLE ---
+    results = px.get_trendline_results(fig)
+    for i, row in results.iterrows():
+        model = row["px_fit_results"]
+        b, a = model.params  # b = intercept, a = pente (slope)
+        r2 = model.rsquared
+        
+        # Construction de la chaîne de l'équation
+        equation = f"y = {a:.3f}x + {b:.1f}"
+        
+        # Mise à jour de la trace de tendance correspondante (index i*2 + 1)
+        # On modifie le texte affiché au survol de la ligne
+        fig.data[i*2 + 1].hovertemplate = (
+            f"<b>Tendance {row['Période']}</b><br>" +
+            f"Équation : {equation}<br>" +
+            f"R² : {r2:.3f}<extra></extra>"
+        )
+    
     fig.update_layout(
         hovermode="closest",
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)

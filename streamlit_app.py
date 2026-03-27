@@ -281,25 +281,30 @@ def main():
         # Extraire les résultats de la tendance
         try:
             import plotly.express as px
+            # Récupération des résultats de toutes les lignes de tendance
             results = px.get_trendline_results(fig_corr)
             # Création de colonnes dynamiques selon le nombre de périodes trouvées
-            if not results.empty:
+            if results is not None and not results.empty:
                 # On crée autant de colonnes qu'il y a de tracés (Semaine, Week-end, etc.)
                 cols_metrics = st.columns(len(results))
-                
                 for i, row in results.iterrows():
-                    # Extraction du nom de la période (ex: "Semaine") et du R2
-                    nom_periode = row["Type de jour"]
-                    r2_val = row["px_fit_results"].rsquared
-                    
-                    # Affichage dans la colonne correspondante
+                    # Extraire les infos du modèle statsmodels sous-jacent
+                    model = row["px_fit_results"]
+                    nom_periode = row["Période"]
+                    # Récupérer le R2 et le nombre d'observations (n)
+                    r2_val = model.rsquared
+                    n_points = int(model.nobs)
+                    # Affichage dans la colonne dédiée
                     with cols_metrics[i]:
+                        b, a = model.params
                         st.metric(
                             label=f"R² ({nom_periode})", 
                             value=f"{r2_val:.3f}".replace(".", ",")
                         )
+                        st.write(f"Equation : :blue[$y = {a:.3f}x + {b:.1f}$]") # Affiche l'équation en bleu
+                        st.caption(f"Basé sur **{n_points}** points de mesure")
         except Exception as e:
-            st.info("Les lignes de tendance ne sont pas disponibles pour cet affichage.")
+            st.info(f"Les lignes de tendance ne sont pas disponibles pour cet affichage. \\ Erreur : {e}")
         st.plotly_chart(fig_corr, use_container_width=True)
 
     # --- FOOTER ---
