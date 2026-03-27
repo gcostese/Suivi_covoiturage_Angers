@@ -206,16 +206,8 @@ def main():
 
     render_metrics(df_raw, df_f, df_res, nb_jours_select)
 
-    tab1 = st.tabs(["Tableau complet"])
-    #tab1, tab2 = st.tabs(["Tableau complet", "Statistiques descriptives"])
-
-    with tab1:
-        st.write("Voici les 10 premières lignes :")
-        st.dataframe(df_raw.head(10), use_container_width=True)
-
-    #with tab2:
-    #    st.write("Résumé mathématique de l'ensemble :")
-    #    st.write(df_raw.describe())
+    st.write("Voici les 10 premières lignes :")
+    st.dataframe(df_raw.head(10), use_container_width=True)
 
     st.divider() # Petite ligne de séparation
 
