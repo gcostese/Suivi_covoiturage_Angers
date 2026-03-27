@@ -297,7 +297,7 @@ def plot_correlation_scatter(df_resampled):
         color_discrete_map={'Semaine': COLORS['solo'], 'Week-end': COLORS['accent']},
         template="plotly_white"
     )
-    
+
     # --- AJOUT DE L'ÉQUATION DANS L'INFOBULLE ---
     results = px.get_trendline_results(fig)
     for i, row in results.iterrows():
@@ -306,7 +306,7 @@ def plot_correlation_scatter(df_resampled):
         r2 = model.rsquared
         
         # Construction de la chaîne de l'équation
-        equation = f"y = {a:.3f}x + {b:.1f}"
+        equation = f"y = {a:.3f}x {b:+.1f}"
         
         # Mise à jour de la trace de tendance correspondante (index i*2 + 1)
         # On modifie le texte affiché au survol de la ligne

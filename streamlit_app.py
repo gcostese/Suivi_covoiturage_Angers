@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import streamlit.components.v1 as components
 import visualizations as viz
 from streamlit_folium import st_folium
@@ -185,7 +186,8 @@ def main():
         granularity, 
         selected_hours
         )
-
+    # Supprime les périodes agrégées qui ne contiennent aucun véhicule
+    df_res = df_res[df_res['nb_vehicules'] > 0]
 
     # --- AFFICHAGE ---
     render_header()
@@ -294,6 +296,10 @@ def main():
                     # Récupérer le R2 et le nombre d'observations (n)
                     r2_val = model.rsquared
                     n_points = int(model.nobs)
+                    
+                    if np.isnan(r2_val) or model.nobs <= 1:
+                        continue
+
                     # Affichage dans la colonne dédiée
                     with cols_metrics[i]:
                         b, a = model.params
@@ -301,7 +307,7 @@ def main():
                             label=f"R² ({nom_periode})", 
                             value=f"{r2_val:.3f}".replace(".", ",")
                         )
-                        st.write(f"Equation : :blue[$y = {a:.3f}x + {b:.1f}$]") # Affiche l'équation en bleu
+                        st.write(f"Equation : :blue[$y = {a:.3f}x {b:+.1f}$]") # Affiche l'équation en bleu
                         st.caption(f"Basé sur **{n_points}** points de mesure")
         except Exception as e:
             st.info(f"Les lignes de tendance ne sont pas disponibles pour cet affichage. \\ Erreur : {e}")
