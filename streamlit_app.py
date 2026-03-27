@@ -11,7 +11,7 @@ def load_data(file_path):
     data = pd.read_parquet(file_path)
     data['datetime'] = pd.to_datetime(data['datetime'])
     data['heure'] = data['datetime'].dt.hour
-    data['week'] = ~data['weekend']  # True si jour de semaine hors weekend, False sinon
+    data['week'] = ~data['weekend'].fillna(False) # True si jour de semaine hors weekend, False sinon
     data['working_day'] = ~data['holiday']  # True si jour ouvrable, False sinon
     data['is_carpool'] = data['total_passengers'] > 1
     data['type_vehicule'] = data['is_carpool'].map({True: 'Covoiturage', False: 'Solo'})
@@ -283,7 +283,7 @@ def main():
             import plotly.express as px
             results = px.get_trendline_results(fig_corr)
             r2 = results.iloc[0]["px_fit_results"].rsquared
-            st.metric("Coefficient de corrélation (R²)", f"{r2:.3f}")
+            st.metric("Coefficient de corrélation (R²)", f"{r2:.3f}".replace(".", ","))
         except:
             pass
         st.plotly_chart(fig_corr, use_container_width=True)

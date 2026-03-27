@@ -278,7 +278,8 @@ def plot_correlation_scatter(df_resampled):
     df_resampled doit contenir 'nb_vehicules', 'nb_covoit' et une colonne pour le type de jour.
     """
     # On recrée une colonne lisible pour la légende
-    df_plot = df_resampled.copy()
+    df_plot = df_resampled.copy().reset_index()
+    df_plot['week'] = df_plot['week'].fillna(True).astype(bool)
     df_plot['Type de jour'] = df_plot['week'].map({True: 'Semaine', False: 'Week-end'})
     
     fig = px.scatter(
