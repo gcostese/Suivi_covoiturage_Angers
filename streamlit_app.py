@@ -212,7 +212,8 @@ def main():
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    tab_dist, tab_evol, tab_hour, tab_week, tab_corr = st.tabs(["🎯 Distribution", "📈 Évolution", "🕒 Profil horaire", "🏁 Profil hebdomadaire", "📊 Corrélation"])
+    st.subheader("🖥️ Datavisualisation")
+    tab_dist, tab_evol, tab_hour, tab_week, tab_corr = st.tabs(["📊 Distribution", "📈 Évolution", "🕒 Profil horaire", "📅 Profil hebdomadaire", "🔀 Corrélation"])
 
     with tab_dist:
         col1, col2 = st.columns(2)
