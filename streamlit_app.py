@@ -282,10 +282,24 @@ def main():
         try:
             import plotly.express as px
             results = px.get_trendline_results(fig_corr)
-            r2 = results.iloc[0]["px_fit_results"].rsquared
-            st.metric("Coefficient de corrélation (R²)", f"{r2:.3f}".replace(".", ","))
-        except:
-            pass
+            # Création de colonnes dynamiques selon le nombre de périodes trouvées
+            if not results.empty:
+                # On crée autant de colonnes qu'il y a de tracés (Semaine, Week-end, etc.)
+                cols_metrics = st.columns(len(results))
+                
+                for i, row in results.iterrows():
+                    # Extraction du nom de la période (ex: "Semaine") et du R2
+                    nom_periode = row["Type de jour"]
+                    r2_val = row["px_fit_results"].rsquared
+                    
+                    # Affichage dans la colonne correspondante
+                    with cols_metrics[i]:
+                        st.metric(
+                            label=f"R² ({nom_periode})", 
+                            value=f"{r2_val:.3f}".replace(".", ",")
+                        )
+        except Exception as e:
+            st.info("Les lignes de tendance ne sont pas disponibles pour cet affichage.")
         st.plotly_chart(fig_corr, use_container_width=True)
 
     # --- FOOTER ---
