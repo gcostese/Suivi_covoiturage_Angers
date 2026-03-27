@@ -66,7 +66,7 @@ def fmt_fr(val, decimal=0):
 
 # --- SECTIONS DE L'INTERFACE ---
 def render_header():
-    st.title("🚀 Analyse des données de covoiturage sur Angers")
+    st.title("🚗👥 Analyse des données de covoiturage sur Angers")
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
         col_text, col_map, col_img = st.columns([1, 1, 1])
         with col_text:
@@ -308,6 +308,8 @@ def main():
         st.plotly_chart(fig_corr, use_container_width=True)
 
     # --- FOOTER ---
+    st.subheader("🚀 Aller plus loin")
+
     # Aperçu des données agrégées
     with st.expander("Voir les données agrégées"):
         st.dataframe(df_res)
