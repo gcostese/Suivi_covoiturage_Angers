@@ -281,10 +281,9 @@ def main():
         st.subheader("Analyse croisée : taux de covoiturage VS débits")
         col_chart, col_legend = st.columns([4, 1])
         with col_chart:
-            st.plotly_chart(viz.plot_heatmap_covoiturage_2d(df_f), use_container_width=True, config={'displayModeBar': False}) 
+            st.plotly_chart(viz.plot_heatmap_covoiturage_2d(df_f), use_container_width=True) 
         with col_legend:
             st.plotly_chart(viz.plot_bivariate_legend(), use_container_width=True, config={'displayModeBar': False})
-        with st.expander("📖 Aide à la lecture du diagramme"):
             st.info("La carte de chaleur bivariée utilise la couleur pour le taux et l'intensité pour le volume de trafic.")
     
     with tab_corr:

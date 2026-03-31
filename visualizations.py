@@ -350,17 +350,17 @@ def get_bivariate_color(taux, debit_norm):
 
     return f'rgb({final_r}, {final_g}, {final_b})'
 
-def plot_bivariate_legend():
+def plot_bivariate_legend(t_min, t_max):
     """Génère une matrice 10x10 servant de légende pour le heatmap bivarié."""
     grid_size = 10
-    taux_vals = np.linspace(0, 100, grid_size)
+    taux_display = np.linspace(t_min, t_max, grid_size)
+    taux_color_scale = np.linspace(0, 100, grid_size)
     debit_vals = np.linspace(0, 1, grid_size)
     
     colors = []
     for d in debit_vals:
         row = []
-        for t in taux_vals:
-            # Utilisation de la nouvelle fonction commune
+        for t in taux_color_scale:
             row.append(get_bivariate_color(t, d))
         colors.append(row)
 
@@ -385,6 +385,10 @@ def plot_bivariate_legend():
         yaxis_title="Débit (Relatif)",
         width=250, height=250,
         margin=dict(l=40, r=20, t=40, b=40),
+        xaxis=dict(
+            tickvals=[t_min, (t_min+t_max)/2, t_max],
+            ticktext=[f"{t_min:.1f}%", f"{(t_min+t_max)/2:.1f}%", f"{t_max:.1f}%"]
+        ),
         xaxis=dict(tickvals=[0, 50, 100], fixedrange=True),
         yaxis=dict(tickvals=[0, 0.5, 1], ticktext=["Faible", "Moyen", "Fort"], fixedrange=True)
     )
@@ -401,22 +405,31 @@ def plot_heatmap_covoiturage_2d(df):
     jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     jours_traduits = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
     
-    # 1. Calcul des deux métriques
+    # 1. Calcul des stats
     stats = df_heat.groupby(['jour_nom', 'heure']).agg(
         taux=('is_carpool', lambda x: x.mean() * 100),
         debit=('is_carpool', 'count')
     ).reset_index()
     
-    # 2. Normalisation du débit pour l'affichage (0 à 1)
-    # On utilise le 95ème percentile pour éviter que les records isolés n'écrasent tout
-    max_debit = stats['debit'].max() if not stats['debit'].empty else 1
-    stats['debit_norm'] = stats['debit'] / max_debit
-    stats['color'] = stats.apply(lambda x: get_bivariate_color(x['taux'], x['debit_norm']), axis=1)
+    # 2. Détermination des bornes réelles
+    t_min = stats['taux'].min()
+    t_max = stats['taux'].max()
+    # On évite la division par zéro si min == max
+    t_range = (t_max - t_min) if t_max > t_min else 1 
     
-    # 3. Fonction de mélange de couleurs (Bivariate Mapping)
-    stats['color'] = stats.apply(lambda x: get_bivariate_color(x['taux'], x['debit_norm']), axis=1)
+    # 3. Normalisation du débit (0 à 1)
+    max_debit = stats['debit'].max()
+    stats['debit_norm'] = stats['debit'] / max_debit
+    
+    # 4. Application de la couleur avec normalisation du taux
+    def get_color_clamped(row):
+        # On transforme le taux réel en une valeur de 0 à 100 relative aux bornes
+        taux_relatif = ((row['taux'] - t_min) / t_range) * 100
+        return get_bivariate_color(taux_relatif, row['debit_norm'])
 
-    # 4. Construction manuelle du Heatmap avec Graph Objects
+    stats['color'] = stats.apply(get_color_clamped, axis=1)
+
+    # Construction manuelle du Heatmap avec Graph Objects
     pivot_color = stats.pivot(index='jour_nom', columns='heure', values='color').reindex(jours_ordre)
     pivot_taux = stats.pivot(index='jour_nom', columns='heure', values='taux').reindex(jours_ordre)
     pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_ordre)
@@ -426,6 +439,7 @@ def plot_heatmap_covoiturage_2d(df):
         x=list(range(24)),
         y=jours_traduits,
         coloraxis="coloraxis",
+        showscale=False,
         customdata=np.dstack((pivot_taux, pivot_debit)),
         hovertemplate="<b>%{y} %{x}h</b><br>Taux : %{customdata[0]:.1f}%<br>Débit : %{customdata[1]} véh/h<extra></extra>"
     ))
@@ -442,6 +456,7 @@ def plot_heatmap_covoiturage_2d(df):
 
     fig.update_layout(title="Intensité du covoiturage bivariée (taux VS débit)",
                       xaxis_title="Heure de la journée", yaxis_title="Jour de la semaine",
+                      margin=dict(r=10),
                       xaxis=dict(dtick=1), yaxis=dict(autorange="reversed"))
     
     return fig
