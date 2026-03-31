@@ -189,7 +189,7 @@ def main():
         selected_hours
         )
     # Supprime les périodes agrégées qui ne contiennent aucun véhicule
-    df_res = df_res[df_res['nb_vehicules'] > 0]
+    df_res_mod = df_res[df_res['nb_vehicules'] > 0]
 
     # --- AFFICHAGE ---
     render_header()
@@ -275,7 +275,7 @@ def main():
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
     
     with tab_corr:
-        fig_corr = viz.plot_correlation_scatter(df_res)
+        fig_corr = viz.plot_correlation_scatter(df_res_mod)
         # Extraire les résultats de la tendance
         try:
             import plotly.express as px

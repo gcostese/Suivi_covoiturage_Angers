@@ -115,9 +115,8 @@ def plot_pie_carpool(df):
     return fig
 
 def plot_evolution_flux(df_res):
-    #df_plot = df_res.reset_index().rename(columns={'index': 'datetime'})
-    # On prépare la donnée melt pour l'évolution
-    df_evolution = df_res.reset_index().melt(
+    df_plot = df_res.reset_index().rename(columns={'index': 'datetime'})
+    df_evolution = df_plot.melt(
         id_vars='datetime', 
         value_vars=['nb_vehicules', 'nb_covoit'],
         var_name='Type de flux', 
@@ -165,7 +164,8 @@ def plot_rate_evolution(df_resampled, granularity, column, title, y_label):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
     full_range = pd.date_range(start=df_resampled.index.min(), end=df_resampled.index.max(), freq=granularity)
     df_resampled = df_resampled.reindex(full_range)
-    df_plot = df_resampled.reset_index().copy()
+    df_plot = df_resampled.reset_index().rename(columns={'index': 'datetime'})
+    df_plot['datetime'] = pd.to_datetime(df_plot['datetime'])
     df_plot[column] = df_plot[column].fillna(0)
     fig = px.area(
         df_plot, 
