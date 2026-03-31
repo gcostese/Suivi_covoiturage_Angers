@@ -4,6 +4,7 @@ numpy
 datetime
 pyarrow
 plotly
+matplotlib
 statsmodels
 folium
 streamlit-folium
