@@ -180,14 +180,14 @@ def plot_seat_efficiency(df_hour):
 
     fig = px.bar(
         df_melted, x='heure', y='Pourcentage', color='État du siège',
-        title="% Sièges occupés vs vides (Base 5 places)",
-        color_discrete_map={'% Occupés': COLORS['covoit'], '% Vides': '#FFCC99'}, # Orange clair comme ton image
+        title="% Sièges occupés vs vides (base = 5 places / véhicule)",
+        color_discrete_map={'% Occupés': COLORS['covoit'], '% Vides': COLORS['solo']},
         barmode='stack'
     )
 
     # 3. Ajustement des axes pour coller à ton image (zoom sur 25% - 40%)
     fig.update_layout(
-        yaxis=dict(range=[25, 40], dtick=5, ticksuffix="%"),
+        yaxis=dict(range=[0, 100], dtick=10, ticksuffix="%"),
         xaxis=dict(tickmode='linear', dtick=1),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
