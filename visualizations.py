@@ -317,32 +317,32 @@ def plot_heatmap_covoiturage(df):
 
 def get_bivariate_color(taux, debit_norm):
     """
-    Calcule la couleur selon la colormap PiYG modifiée par le débit.
-    taux: 0 à 100 | debit_norm: 0 à 1
+    Colormap bivariée : Bleu (bas) -> Blanc (50%) -> Rouge (haut).
+    La saturation augmente avec le débit.
     """
-    # Points d'ancrage (R, G, B)
-    rose = [197, 27, 125]    # Bas taux
-    jaune = [255, 255, 191]  # Milieu (50%)
-    vert = [31, 120, 31]     # Haut taux (Vert foncé type Cerema)
+    # 1. Définition des couleurs aux extrémités (R, G, B)
+    bleu_pur = [31, 119, 180]   # Un beau bleu standard
+    blanc = [255, 255, 255]     # Point neutre à 50%
+    rouge_pur = [214, 39, 40]   # Un rouge vif
 
-    # 1. Interpolation de la teinte (Hue) selon le taux
+    # 2. Interpolation de la teinte selon le taux
     if taux < 50:
-        # Interpolation Rose -> Jaune
+        # Interpolation Bleu -> Blanc
         f = taux / 50
-        r = int(rose[0] + (jaune[0] - rose[0]) * f)
-        g = int(rose[1] + (jaune[1] - rose[1]) * f)
-        b = int(rose[2] + (jaune[2] - rose[2]) * f)
+        r = int(bleu_pur[0] + (blanc[0] - bleu_pur[0]) * f)
+        g = int(bleu_pur[1] + (blanc[1] - bleu_pur[1]) * f)
+        b = int(bleu_pur[2] + (blanc[2] - bleu_pur[2]) * f)
     else:
-        # Interpolation Jaune -> Vert
+        # Interpolation Blanc -> Rouge
         f = (taux - 50) / 50
-        r = int(jaune[0] + (vert[0] - jaune[0]) * f)
-        g = int(jaune[1] + (vert[1] - jaune[1]) * f)
-        b = int(jaune[2] + (vert[2] - jaune[2]) * f)
+        r = int(blanc[0] + (rouge_pur[0] - blanc[0]) * f)
+        g = int(blanc[1] + (rouge_pur[1] - blanc[1]) * f)
+        b = int(blanc[2] + (rouge_pur[2] - blanc[2]) * f)
 
-    # 2. Ajustement par le débit (Luminosité/Saturation)
-    # Si débit faible (0), on tend vers le blanc cassé pour "effacer" la donnée peu significative
-    # Si débit fort (1), on garde la couleur pure calculée ci-dessus
-    l_factor = 0.3 + (0.7 * debit_norm) 
+    # 3. Ajustement par le débit (Saturation)
+    # Si débit = 0 -> On force vers le blanc (indépendamment du taux)
+    # Si débit = 1 -> On garde la couleur pleine
+    l_factor = 0.2 + (0.8 * debit_norm) 
     
     final_r = int(r * l_factor + (255 * (1 - l_factor)))
     final_g = int(g * l_factor + (255 * (1 - l_factor)))
