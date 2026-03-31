@@ -163,7 +163,7 @@ def plot_stacked_persons(df_stats):
 
 def plot_rate_evolution(df_resampled, granularity, column, title, y_label):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
-    full_range = pd.date_range(start=df_resampled['datetime'].min(), end=df_resampled['datetime'].max(), freq=granularity)
+    full_range = pd.date_range(start=df_resampled.index.min(), end=df_resampled.index.max(), freq=granularity)
     df_resampled = df_resampled.reindex(full_range)
     df_plot = df_resampled.reset_index().copy()
     df_plot[column] = df_plot[column].fillna(0)
