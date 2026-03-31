@@ -71,7 +71,9 @@ def render_header():
         col_text, col_map, col_img = st.columns([1, 1, 1])
         with col_text:
             st.markdown("""
-            Ce tableau de bord présente les données issues d'un **capteur de covoiturage** déployé par le **Cerema** sur la **D523 à Angers**.
+            Ce tableau de bord présente les données issues d'un **capteur de covoiturage** de la société [Invision AI](https://invision.ai/) 
+                        déployé par le **[Cerema](https://www.cerema.fr/)** 
+                        sur la **D523 à Angers** en partenariat avec le [Département de Maine-et-Loire](https://www.maine-et-loire.fr).
             
             **Objectifs :**
             * Suivre l'évolution des pratiques de mobilité sur cet axe structurant.
