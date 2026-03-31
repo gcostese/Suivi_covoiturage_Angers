@@ -271,6 +271,10 @@ def main():
             })
         st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True)
 
+        st.divider()
+        st.subheader("Analyse des sièges vides")
+        st.plotly_chart(viz.plot_seat_efficiency(df_hour), use_container_width=True)
+
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
     

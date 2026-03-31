@@ -160,6 +160,40 @@ def plot_stacked_persons(df_stats):
     )
     return fig
 
+def plot_seat_efficiency(df_hour):
+    """
+    Calcule et affiche le % de sièges occupés vs vides par heure.
+    Base : 5 places par véhicule.
+    """
+    # 1. Calcul des métriques (on suppose 5 places par véhicule)
+    df_hour['sieges_totaux'] = df_hour['total_veh_cumul'] * 5
+    df_hour['% Occupés'] = (df_hour['total_pers_cumul'] / df_hour['sieges_totaux']) * 100
+    df_hour['% Vides'] = 100 - df_hour['% Occupés']
+    
+    # 2. Passage en format long pour Plotly
+    df_melted = df_hour.melt(
+        id_vars='heure', 
+        value_vars=['% Occupés', '% Vides'],
+        var_name='État du siège', 
+        value_name='Pourcentage'
+    )
+
+    fig = px.bar(
+        df_melted, x='heure', y='Pourcentage', color='État du siège',
+        title="% Sièges occupés vs vides (Base 5 places)",
+        color_discrete_map={'% Occupés': COLORS['covoit'], '% Vides': '#FFCC99'}, # Orange clair comme ton image
+        barmode='stack'
+    )
+
+    # 3. Ajustement des axes pour coller à ton image (zoom sur 25% - 40%)
+    fig.update_layout(
+        yaxis=dict(range=[25, 40], dtick=5, ticksuffix="%"),
+        xaxis=dict(tickmode='linear', dtick=1),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    
+    return fig
+
 def plot_rate_evolution(df_resampled, granularity, column, title, y_label):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
     full_range = pd.date_range(start=df_resampled.index.min(), end=df_resampled.index.max(), freq=granularity)
