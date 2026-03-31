@@ -1,7 +1,9 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import matplotlib.colors as mcolors
 import folium
 from streamlit_folium import folium_static
 try:
@@ -309,7 +311,123 @@ def plot_heatmap_covoiturage(df):
     )
     
     fig.update_xaxes(dtick=1) # Afficher toutes les heures
-    fig.update_layout(coloraxis_colorbar=dict(title="%"))
+    fig.update_layout(coloraxis_colorbar=dict(title="Taux de covoiturage (%)"))
+    
+    return fig
+
+def plot_bivariate_legend():
+    """Génère une matrice 10x10 servant de légende pour le heatmap bivarié."""
+    grid_size = 10
+    taux_vals = np.linspace(0, 100, grid_size)
+    debit_vals = np.linspace(0, 1, grid_size)
+    
+    colors = []
+    for d in debit_vals:
+        row = []
+        for t in taux_vals:
+            # On réutilise la même logique de calcul de couleur
+            if t < 50:
+                base_rgb = [255, int(5.1 * t), 0]
+            else:
+                base_rgb = [int(255 - 5.1 * (t-50)), 255, 0]
+            
+            factor = 0.3 + (0.7 * d)
+            final_rgb = [int(c * factor + (255 * (1-factor))) for c in base_rgb]
+            row.append(f'rgb({final_rgb[0]}, {final_rgb[1]}, {final_rgb[2]})')
+        colors.append(row)
+
+    fig = go.Figure(data=go.Heatmap(
+        z=[[i for i in range(grid_size)] for j in range(grid_size)],
+        x=taux_vals,
+        y=debit_vals,
+        showscale=False,
+        hoverinfo='none'
+    ))
+
+    # Application des couleurs à la grille
+    for r, row in enumerate(colors):
+        for c, color in enumerate(row):
+            fig.add_shape(type="rect", x0=taux_vals[c]-5, y0=debit_vals[r]-0.05, 
+                          x1=taux_vals[c]+5, y1=debit_vals[r]+0.05, 
+                          fillcolor=color, line=dict(width=0))
+
+    fig.update_layout(
+        title="Légende Bivariée",
+        xaxis_title="Taux (%)",
+        yaxis_title="Débit (Relatif)",
+        width=250, height=250,
+        margin=dict(l=40, r=20, t=40, b=40),
+        xaxis=dict(tickvals=[0, 50, 100], fixedrange=True),
+        yaxis=dict(tickvals=[0, 0.5, 1], ticktext=["Faible", "Moyen", "Fort"], fixedrange=True)
+    )
+    return fig
+
+def plot_heatmap_covoiturage_2d(df):
+    """
+    Génère un damier bivarié : 
+    - Teinte (Hue) : Taux de covoiturage (Rouge -> Vert)
+    - Luminosité/Saturation : Débit total (Clair -> Sombre)
+    """
+    df_heat = df.copy()
+    df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
+    jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    jours_traduits = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    
+    # 1. Calcul des deux métriques
+    stats = df_heat.groupby(['jour_nom', 'heure']).agg(
+        taux=('is_carpool', lambda x: x.mean() * 100),
+        debit=('is_carpool', 'count')
+    ).reset_index()
+    
+    # 2. Normalisation du débit pour l'affichage (0 à 1)
+    # On utilise le 95ème percentile pour éviter que les records isolés n'écrasent tout
+    max_debit = stats['debit'].quantile(0.95)
+    stats['debit_norm'] = (stats['debit'] / max_debit).clip(upper=1)
+    
+    # 3. Fonction de mélange de couleurs (Bivariate Mapping)
+    def get_bivariate_color(taux, debit_norm):
+        # Palette de base : Rouge (bas covoit) -> Jaune -> Vert (haut covoit)
+        if taux < 50:
+            # Interpolation Rouge (255,0,0) vers Jaune (255,255,0)
+            base_rgb = [255, int(5.1 * taux), 0]
+        else:
+            # Interpolation Jaune (255,255,0) vers Vert (0,255,0)
+            base_rgb = [int(255 - 5.1 * (taux-50)), 255, 0]
+            
+        # Ajustement par le débit : Plus il y a de débit, plus la couleur est saturée/sombre
+        # Moins il y a de débit, plus on tend vers le blanc cassé
+        factor = 0.3 + (0.7 * debit_norm) 
+        final_rgb = [int(c * factor + (255 * (1-factor))) for c in base_rgb]
+        return f'rgb({final_rgb[0]}, {final_rgb[1]}, {final_rgb[2]})'
+
+    stats['color'] = stats.apply(lambda x: get_bivariate_color(x['taux'], x['debit_norm']), axis=1)
+
+    # 4. Construction manuelle du Heatmap avec Graph Objects
+    pivot_color = stats.pivot(index='jour_nom', columns='heure', values='color').reindex(jours_ordre)
+    pivot_taux = stats.pivot(index='jour_nom', columns='heure', values='taux').reindex(jours_ordre)
+    pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_ordre)
+
+    fig = go.Figure(data=go.Heatmap(
+        z=[[i for i in range(24)] for j in range(7)], # Valeurs fictives pour la structure
+        x=list(range(24)),
+        y=jours_traduits,
+        coloraxis="coloraxis",
+        customdata=np.dstack((pivot_taux, pivot_debit)),
+        hovertemplate="<b>%{y} %{x}h</b><br>Taux : %{customdata[0]:.1f}%<br>Débit : %{customdata[1]} véh/h<extra></extra>"
+    ))
+
+    # On applique les couleurs calculées cellule par cellule
+    colors_list = pivot_color.values.tolist()
+    fig.update_traces(zmin=0, zmax=1, showscale=False) # On cache la colorbar standard
+    
+    # Ajout des rectangles de couleur
+    for r, row in enumerate(colors_list):
+        for c, color in enumerate(row):
+            fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
+                          fillcolor=color, line=dict(width=0))
+
+    fig.update_layout(title="Intensité bivariée (Couleur=Taux, Luminosité=Débit)",
+                      xaxis=dict(dtick=1), yaxis=dict(autorange="reversed"))
     
     return fig
 
