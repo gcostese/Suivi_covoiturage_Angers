@@ -187,7 +187,7 @@ def plot_seat_efficiency(df_hour):
 
     # 3. Ajustement des axes pour coller à ton image (zoom sur 25% - 40%)
     fig.update_layout(
-        yaxis=dict(range=[0, 100], dtick=10, ticksuffix="%"),
+        yaxis=dict(range=[10, 50], dtick=5, ticksuffix="%"),
         xaxis=dict(tickmode='linear', dtick=1),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
