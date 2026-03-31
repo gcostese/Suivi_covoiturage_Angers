@@ -116,7 +116,7 @@ def plot_pie_carpool(df):
 def plot_evolution_flux(df_res):
     df_plot = df_res.reset_index().rename(columns={'index': 'datetime'})
     # On prépare la donnée melt pour l'évolution
-    df_evolution = df_res.reset_index().melt(
+    df_evolution = df_plot.reset_index().melt(
         id_vars='datetime', 
         value_vars=['nb_vehicules', 'nb_covoit'],
         var_name='Type de flux', 
