@@ -315,6 +315,41 @@ def plot_heatmap_covoiturage(df):
     
     return fig
 
+def get_bivariate_color(taux, debit_norm):
+    """
+    Calcule la couleur selon la colormap PiYG modifiée par le débit.
+    taux: 0 à 100 | debit_norm: 0 à 1
+    """
+    # Points d'ancrage (R, G, B)
+    rose = [197, 27, 125]    # Bas taux
+    jaune = [255, 255, 191]  # Milieu (50%)
+    vert = [31, 120, 31]     # Haut taux (Vert foncé type Cerema)
+
+    # 1. Interpolation de la teinte (Hue) selon le taux
+    if taux < 50:
+        # Interpolation Rose -> Jaune
+        f = taux / 50
+        r = int(rose[0] + (jaune[0] - rose[0]) * f)
+        g = int(rose[1] + (jaune[1] - rose[1]) * f)
+        b = int(rose[2] + (jaune[2] - rose[2]) * f)
+    else:
+        # Interpolation Jaune -> Vert
+        f = (taux - 50) / 50
+        r = int(jaune[0] + (vert[0] - jaune[0]) * f)
+        g = int(jaune[1] + (vert[1] - jaune[1]) * f)
+        b = int(jaune[2] + (vert[2] - jaune[2]) * f)
+
+    # 2. Ajustement par le débit (Luminosité/Saturation)
+    # Si débit faible (0), on tend vers le blanc cassé pour "effacer" la donnée peu significative
+    # Si débit fort (1), on garde la couleur pure calculée ci-dessus
+    l_factor = 0.3 + (0.7 * debit_norm) 
+    
+    final_r = int(r * l_factor + (255 * (1 - l_factor)))
+    final_g = int(g * l_factor + (255 * (1 - l_factor)))
+    final_b = int(b * l_factor + (255 * (1 - l_factor)))
+
+    return f'rgb({final_r}, {final_g}, {final_b})'
+
 def plot_bivariate_legend():
     """Génère une matrice 10x10 servant de légende pour le heatmap bivarié."""
     grid_size = 10
@@ -325,15 +360,8 @@ def plot_bivariate_legend():
     for d in debit_vals:
         row = []
         for t in taux_vals:
-            # On réutilise la même logique de calcul de couleur
-            if t < 50:
-                base_rgb = [255, int(5.1 * t), 0]
-            else:
-                base_rgb = [int(255 - 5.1 * (t-50)), 255, 0]
-            
-            factor = 0.3 + (0.7 * d)
-            final_rgb = [int(c * factor + (255 * (1-factor))) for c in base_rgb]
-            row.append(f'rgb({final_rgb[0]}, {final_rgb[1]}, {final_rgb[2]})')
+            # Utilisation de la nouvelle fonction commune
+            row.append(get_bivariate_color(t, d))
         colors.append(row)
 
     fig = go.Figure(data=go.Heatmap(
@@ -381,25 +409,11 @@ def plot_heatmap_covoiturage_2d(df):
     
     # 2. Normalisation du débit pour l'affichage (0 à 1)
     # On utilise le 95ème percentile pour éviter que les records isolés n'écrasent tout
-    max_debit = stats['debit'].quantile(0.95)
-    stats['debit_norm'] = (stats['debit'] / max_debit).clip(upper=1)
+    max_debit = stats['debit'].max() if not stats['debit'].empty else 1
+    stats['debit_norm'] = stats['debit'] / max_debit
+    stats['color'] = stats.apply(lambda x: get_bivariate_color(x['taux'], x['debit_norm']), axis=1)
     
     # 3. Fonction de mélange de couleurs (Bivariate Mapping)
-    def get_bivariate_color(taux, debit_norm):
-        # Palette de base : Rouge (bas covoit) -> Jaune -> Vert (haut covoit)
-        if taux < 50:
-            # Interpolation Rouge (255,0,0) vers Jaune (255,255,0)
-            base_rgb = [255, int(5.1 * taux), 0]
-        else:
-            # Interpolation Jaune (255,255,0) vers Vert (0,255,0)
-            base_rgb = [int(255 - 5.1 * (taux-50)), 255, 0]
-            
-        # Ajustement par le débit : Plus il y a de débit, plus la couleur est saturée/sombre
-        # Moins il y a de débit, plus on tend vers le blanc cassé
-        factor = 0.3 + (0.7 * debit_norm) 
-        final_rgb = [int(c * factor + (255 * (1-factor))) for c in base_rgb]
-        return f'rgb({final_rgb[0]}, {final_rgb[1]}, {final_rgb[2]})'
-
     stats['color'] = stats.apply(lambda x: get_bivariate_color(x['taux'], x['debit_norm']), axis=1)
 
     # 4. Construction manuelle du Heatmap avec Graph Objects
@@ -426,7 +440,8 @@ def plot_heatmap_covoiturage_2d(df):
             fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
                           fillcolor=color, line=dict(width=0))
 
-    fig.update_layout(title="Intensité bivariée (Couleur=Taux, Luminosité=Débit)",
+    fig.update_layout(title="Intensité du covoiturage bivariée (taux VS débit)",
+                      xaxis_title="Heure de la journée", yaxis_title="Jour de la semaine",
                       xaxis=dict(dtick=1), yaxis=dict(autorange="reversed"))
     
     return fig
