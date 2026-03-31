@@ -38,6 +38,8 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
         'is_carpool': 'sum',
         'week': 'first'
     })
+    full_range = pd.date_range(start=df_f['datetime'].min(), end=df_f['datetime'].max(), freq=granularity)
+    resampled = resampled.reindex(full_range)
     resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit', 'week']
     resampled['taux_covoiturage'] = (resampled['nb_covoit'] / resampled['nb_vehicules']) * 100
     resampled['taux_occupation_moyen'] = resampled['total_personnes'] / resampled['nb_vehicules']

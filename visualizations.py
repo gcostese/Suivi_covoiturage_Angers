@@ -161,13 +161,16 @@ def plot_stacked_persons(df_stats):
 
 def plot_rate_evolution(df_resampled, column, title, y_label):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
+    df_plot = df_resampled.reset_index().copy()
+    df_plot[column] = df_plot[column].fillna(0)
     fig = px.area(
-        df_resampled.reset_index(), 
+        df_plot, 
         x='datetime', 
         y=column, 
         title=title,
         labels={column: y_label, 'datetime': 'Temps'}
-    )
+    ) 
+    fig.update_traces(connectgaps=False)
     return fig
 
 def plot_hourly_profile_mixed(df_par_heure):
