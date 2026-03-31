@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -114,9 +115,9 @@ def plot_pie_carpool(df):
     return fig
 
 def plot_evolution_flux(df_res):
-    df_plot = df_res.reset_index().rename(columns={'index': 'datetime'})
+    #df_plot = df_res.reset_index().rename(columns={'index': 'datetime'})
     # On prépare la donnée melt pour l'évolution
-    df_evolution = df_plot.reset_index().melt(
+    df_evolution = df_res.reset_index().melt(
         id_vars='datetime', 
         value_vars=['nb_vehicules', 'nb_covoit'],
         var_name='Type de flux', 
@@ -160,8 +161,10 @@ def plot_stacked_persons(df_stats):
     )
     return fig
 
-def plot_rate_evolution(df_resampled, column, title, y_label):
+def plot_rate_evolution(df_resampled, granularity, column, title, y_label):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
+    full_range = pd.date_range(start=df_resampled['datetime'].min(), end=df_resampled['datetime'].max(), freq=granularity)
+    df_resampled = df_resampled.reindex(full_range)
     df_plot = df_resampled.reset_index().copy()
     df_plot[column] = df_plot[column].fillna(0)
     fig = px.area(

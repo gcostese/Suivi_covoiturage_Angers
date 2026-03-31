@@ -38,8 +38,6 @@ def get_processed_data(df, working_days, week_days, granularity, selected_hours)
         'is_carpool': 'sum',
         'week': 'first'
     })
-    full_range = pd.date_range(start=df_f['datetime'].min(), end=df_f['datetime'].max(), freq=granularity)
-    resampled = resampled.reindex(full_range)
     resampled.columns = ['nb_vehicules', 'total_personnes', 'nb_covoit', 'week']
     resampled['taux_covoiturage'] = (resampled['nb_covoit'] / resampled['nb_vehicules']) * 100
     resampled['taux_occupation_moyen'] = resampled['total_personnes'] / resampled['nb_vehicules']
@@ -244,7 +242,7 @@ def main():
         st.divider()
         st.subheader("Évolution du taux de covoiturage")
         st.plotly_chart(
-            viz.plot_rate_evolution(df_res, 'taux_covoiturage', "Taux de covoiturage", "Pourcentage"),
+            viz.plot_rate_evolution(df_res, granularity, 'taux_covoiturage', "Taux de covoiturage", "Pourcentage"),
             use_container_width=True, 
             theme="streamlit"
         )
@@ -252,7 +250,7 @@ def main():
         st.divider()
         st.subheader("Évolution du taux d'occupation")
         st.plotly_chart(
-            viz.plot_rate_evolution(df_res, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Pers/Véh"),
+            viz.plot_rate_evolution(df_res, granularity, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Pers/Véh"),
             use_container_width=True, 
             theme="streamlit"
         )
