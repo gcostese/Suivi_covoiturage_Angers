@@ -278,8 +278,7 @@ def main():
     with tab_week:
         st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
         
-        st.subheader("Analyse croisée : taux de covoiturage VS débits")
-        # Calcul des bornes pour la légende
+        # Analyse bivariée
         taux_series = df_f.groupby([df_f['datetime'].dt.day_name(), 'heure'])['is_carpool'].mean() * 100
         t_min, t_max = taux_series.min(), taux_series.max()
         col_chart, col_legend = st.columns([4, 1])

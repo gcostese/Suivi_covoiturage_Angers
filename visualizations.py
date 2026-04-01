@@ -457,8 +457,9 @@ def plot_heatmap_covoiturage_2d(df):
     # Ajout des rectangles de couleur
     for r, row in enumerate(colors_list):
         for c, color in enumerate(row):
-            fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
-                          fillcolor=color, line=dict(width=0))
+            if pd.notna(color):
+                fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
+                              fillcolor=color, line=dict(width=0))
 
     fig.update_layout(
         title="Intensité du covoiturage bivariée (taux VS débit)",
