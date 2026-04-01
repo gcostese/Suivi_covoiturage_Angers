@@ -403,13 +403,19 @@ def plot_heatmap_covoiturage_2d(df):
     df_heat = df.copy()
     df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
     jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    jours_traduits = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    traductions = {
+        'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 
+        'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche'
+    }
 
     # 1. Calcul des stats
     stats = df_heat.groupby(['jour_nom', 'heure']).agg(
         taux=('is_carpool', lambda x: x.mean() * 100),
         debit=('is_carpool', 'count')
     ).reset_index()
+
+    jours_presents = [j for j in jours_ordre if j in stats['jour_nom'].unique()]
+    jours_a_afficher = [traductions[j] for j in jours_presents]
     
     # 2. Détermination des bornes réelles
     t_min = stats['taux'].min()
@@ -436,9 +442,9 @@ def plot_heatmap_covoiturage_2d(df):
     pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_ordre)
 
     fig = go.Figure(data=go.Heatmap(
-        z=[[i for i in range(24)] for j in range(7)],
+        z=[[i for i in range(24)] for j in range(len(jours_presents))],
         x=list(range(24)),
-        y=jours_traduits,
+        y=jours_a_afficher,
         showscale=False,
         customdata=np.dstack((pivot_taux, pivot_debit)),
         hovertemplate="<b>%{y} %{x}h</b><br>Taux : %{customdata[0]:.1f}%<br>Débit : %{customdata[1]} véh/h<extra></extra>"
