@@ -389,7 +389,6 @@ def plot_bivariate_legend(t_min, t_max):
             tickvals=[t_min, (t_min+t_max)/2, t_max],
             ticktext=[f"{t_min:.1f}%", f"{(t_min+t_max)/2:.1f}%", f"{t_max:.1f}%"]
         ),
-        xaxis=dict(tickvals=[0, 50, 100], fixedrange=True),
         yaxis=dict(tickvals=[0, 0.5, 1], ticktext=["Faible", "Moyen", "Fort"], fixedrange=True)
     )
     return fig
