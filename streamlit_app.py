@@ -120,21 +120,35 @@ def main():
     st.markdown(
         """
         <style>
-            /* Couleur de fond de la barre latérale */
+            /* 1. BARRE LATÉRALE ORANGE CEREMA */
             [data-testid="stSidebar"] {
                 background-color: #EF7757;
             }
-
-            /* Couleur du texte et des icônes dans la barre latérale pour la lisibilité */
             [data-testid="stSidebar"] .stText, 
             [data-testid="stSidebar"] label, 
-            [data-testid="stSidebar"] .stMarkdown {
-                color: white;
+            [data-testid="stSidebar"] .stMarkdown p {
+                color: white !important;
+            }
+
+            /* 2. BOUTONS RADIO (CERCLE ET COULEUR DE SÉLECTION) */
+            /* Change la couleur du cercle quand il est coché */
+            div[data-testid="stRadio"] div[role="radiogroup"] input[壓te-checked="true"] + div div {
+                background-color: #292574 !important;
             }
             
-            /* Ajustement des boutons radio et sliders si nécessaire */
-            [data-testid="stSidebar"] .stWidgetLabel p {
-                color: white !important;
+            /* Cible spécifiquement le cercle intérieur des boutons radio Streamlit */
+            div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
+                color: #31333F; /* Garder le texte des options en sombre si hors sidebar */
+            }
+
+            /* 3. COULEUR PRIMAIRE GÉNÉRALE (Boutons, Sliders, Checkboxes) */
+            /* Cette règle force le bleu sur tous les éléments actifs */
+            :root {
+                --primary-color: #292574;
+            }
+            
+            .st-at {
+                background-color: #292574 !important;
             }
         </style>
         """,
