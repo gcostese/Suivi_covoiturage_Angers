@@ -395,81 +395,82 @@ def plot_bivariate_legend(t_min=0, t_max=100):
     return fig
 
 def plot_heatmap_covoiturage_2d(df):
-    """
-    Génère un damier bivarié : 
-    - Teinte (Hue) : Taux de covoiturage (Rouge -> Vert)
-    - Luminosité/Saturation : Débit total (Clair -> Sombre)
-    """
     df_heat = df.copy()
     df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
+    
+    # Ordre de référence et traductions
     jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     traductions = {
         'Monday': 'Lundi', 'Tuesday': 'Mardi', 'Wednesday': 'Mercredi', 
         'Thursday': 'Jeudi', 'Friday': 'Vendredi', 'Saturday': 'Samedi', 'Sunday': 'Dimanche'
     }
-
-    # 1. Calcul des stats
+    
+    # 1. Calcul des statistiques
     stats = df_heat.groupby(['jour_nom', 'heure']).agg(
         taux=('is_carpool', lambda x: x.mean() * 100),
         debit=('is_carpool', 'count')
     ).reset_index()
-
+    
+    # 2. Identifier les jours présents après filtrage
     jours_presents = [j for j in jours_ordre if j in stats['jour_nom'].unique()]
     jours_a_afficher = [traductions[j] for j in jours_presents]
     
-    # 2. Détermination des bornes réelles
-    t_min = stats['taux'].min()
-    t_max = stats['taux'].max()
+    # 3. Calcul des bornes harmonisées (Multiple de 5)
+    t_min, t_max = stats['taux'].min(), stats['taux'].max()
     t_min_plot = (t_min // 5) * 5
     t_max_plot = ((t_max // 5) + 1) * 5
-    t_range_plot = (t_max_plot - t_min_plot) if t_max_plot > t_min_plot else 1 
+    t_range_plot = max(t_max_plot - t_min_plot, 1)
     
-    # 3. Normalisation du débit (0 à 1)
     max_debit = stats['debit'].max()
     stats['debit_norm'] = stats['debit'] / max_debit
     
-    # 4. Application de la couleur avec normalisation du taux
+    # 4. Couleurs harmonisées
     def get_color_clamped(row):
-        # On transforme le taux réel en une valeur de 0 à 100 relative aux bornes
         taux_relatif = ((row['taux'] - t_min_plot) / t_range_plot) * 100
         return get_bivariate_color(taux_relatif, row['debit_norm'])
 
     stats['color'] = stats.apply(get_color_clamped, axis=1)
 
-    # Construction manuelle du Heatmap avec Graph Objects
-    pivot_color = stats.pivot(index='jour_nom', columns='heure', values='color').reindex(jours_ordre)
-    pivot_taux = stats.pivot(index='jour_nom', columns='heure', values='taux').reindex(jours_ordre)
-    pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_ordre)
+    # 5. Création des pivots avec REINDEX sur jours_presents uniquement
+    pivot_color = stats.pivot(index='jour_nom', columns='heure', values='color').reindex(jours_presents)
+    pivot_taux = stats.pivot(index='jour_nom', columns='heure', values='taux').reindex(jours_presents)
+    pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_presents)
 
-    fig = go.Figure(data=go.Heatmap(
-        z=[[i for i in range(24)] for j in range(len(jours_presents))],
+    # 6. Création de la figure VIDE (on initialise juste les axes)
+    fig = go.Figure()
+
+    # On ajoute une trace Heatmap "fantôme" transparente pour définir les axes et le hover
+    # z doit correspondre à la taille RÉELLE des données filtrées
+    fig.add_trace(go.Heatmap(
+        z=np.zeros((len(jours_presents), 24)),
         x=list(range(24)),
         y=jours_a_afficher,
         showscale=False,
-        customdata=np.dstack((pivot_taux, pivot_debit)),
+        opacity=0, # Rend la trace invisible pour ne plus voir les blocs bleus
+        customdata=np.dstack((pivot_taux.values, pivot_debit.values)),
         hovertemplate="<b>%{y} %{x}h</b><br>Taux : %{customdata[0]:.1f}%<br>Débit : %{customdata[1]} véh/h<extra></extra>"
     ))
 
-    # On applique les couleurs calculées cellule par cellule
-    colors_list = pivot_color.values.tolist()
-    fig.update_traces(zmin=0, zmax=1, showscale=False) # On cache la colorbar standard
-    
-    # Ajout des rectangles de couleur
-    for r, row in enumerate(colors_list):
-        for c, color in enumerate(row):
+    # 7. Dessin des rectangles (uniquement là où il y a de la donnée)
+    for r in range(len(jours_presents)):
+        for c in range(24):
+            color = pivot_color.iloc[r, c]
             if pd.notna(color):
-                fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
-                              fillcolor=color, line=dict(width=0))
+                fig.add_shape(
+                    type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
+                    fillcolor=color, line=dict(width=0.5, color='white')
+                )
 
     fig.update_layout(
-        title="Intensité du covoiturage bivariée (taux VS débit)",
-        xaxis_title="Heure de la journée",
+        title="Intensité bivariée du covoiturage (taux VS débit)",
+        xaxis_title="Heure de la journée", 
         yaxis_title="Jour de la semaine",
         margin=dict(r=10, t=60),
-        xaxis=dict(dtick=1),
-        yaxis=dict(autorange="reversed"),
-        coloraxis_showscale=False
-        )
+        xaxis=dict(dtick=1, range=[-0.5, 23.5], fixedrange=True), 
+        yaxis=dict(autorange="reversed", fixedrange=True),
+        height=150 + (len(jours_presents) * 35), # Hauteur dynamique selon le nombre de jours
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     
     return fig
 
