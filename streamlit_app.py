@@ -68,9 +68,7 @@ def fmt_fr(val, decimal=0):
 def render_header():
     st.title("🚗👥 Analyse des données de covoiturage sur Angers")
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
-        col_text, col_map, col_img = st.columns([1, 1, 1])
-        with col_text:
-            st.markdown("""
+        st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** de la société [Invision AI](https://invision.ai/) 
                         déployé par le **[Cerema](https://www.cerema.fr/)** 
                         sur la **D523 à Angers** en partenariat avec le [Département de Maine-et-Loire](https://www.maine-et-loire.fr).
@@ -80,19 +78,21 @@ def render_header():
             * Alimenter l'**[Observatoire National du Covoiturage au Quotidien](https://observatoire.covoiturage.gouv.fr/)**.
             * Comparer ces performances avec d'autres sites instrumentés en France.
             """)
+
+        col1, col_map, col_img, col4 = st.columns([1, 2, 2, 1])
         with col_map:
             st.markdown("""📍 **Localisation :** """)
             # Affichage de la carte interactive
             m = viz.plot_sensor_map()
             if m:
-                st_folium(m, width=400, height=200, key="angers_map")
+                st_folium(m, width=400, height=300, key="angers_map")
             else:
                 st.error("Impossible de charger la carte.")
                 st.link_button("Voir l'emplacement du capteur sur Google Maps", "https://maps.app.goo.gl/ckfqhaZpKWt8UyMY6")
         with col_img:
             map_html = """
             <iframe src="https://www.google.com/maps/embed?pb=!4v1774273135064!6m8!1m7!1srhUgFf_7vpdd4CoIKwl9oQ!2m2!1d47.46375210665583!2d-0.6383491700641112!3f69.2!4f5.079999999999998!5f1.1924812503605782" 
-            width="400" height="400" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
             """
             components.html(map_html, height=450)
 
@@ -117,10 +117,10 @@ def main():
                        layout="wide")
     PERIODS = {
         "Toute la journée": list(range(0, 24)),
-        "Pointe Matin (7h-9h)": [7, 8, 9],
-        "Creux Journée (10h-16h)": [10, 11, 12, 13, 14, 15],
-        "Pointe Soir (16h-19h)": [16, 17, 18],
-        "Nuit (19h-7h)": [19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5, 6]
+        "Pointe du matin (7h-9h)": [7, 8, 9],
+        "Creux en journée (10h-16h)": [10, 11, 12, 13, 14, 15],
+        "Pointe du soir (16h-19h)": [16, 17, 18],
+        "Nuit (19h-7h)": [0, 1, 2, 3, 4, 5, 6,19, 20, 21, 22, 23]
     }
     
     # ---- CHARGEMENT DES DONNÉES ----
