@@ -77,11 +77,12 @@ def render_header():
             * Suivre l'évolution des pratiques de mobilité sur cet axe structurant.
             * Alimenter l'**[Observatoire National du Covoiturage au Quotidien](https://observatoire.covoiturage.gouv.fr/)**.
             * Comparer ces performances avec d'autres sites instrumentés en France.
+                    
+            📍 **Localisation :**
             """)
 
         col1, col_map, col_img, col4 = st.columns([1, 2, 2, 1])
         with col_map:
-            st.markdown("""📍 **Localisation :** """)
             # Affichage de la carte interactive
             m = viz.plot_sensor_map()
             if m:
@@ -115,6 +116,31 @@ def main():
     st.set_page_config(page_title="Mesure du covoiturage à Angers", 
                        page_icon="📊", 
                        layout="wide")
+    
+    st.markdown(
+        """
+        <style>
+            /* Couleur de fond de la barre latérale */
+            [data-testid="stSidebar"] {
+                background-color: #EF7757;
+            }
+
+            /* Couleur du texte et des icônes dans la barre latérale pour la lisibilité */
+            [data-testid="stSidebar"] .stText, 
+            [data-testid="stSidebar"] label, 
+            [data-testid="stSidebar"] .stMarkdown {
+                color: white;
+            }
+            
+            /* Ajustement des boutons radio et sliders si nécessaire */
+            [data-testid="stSidebar"] .stWidgetLabel p {
+                color: white !important;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     PERIODS = {
         "Toute la journée": list(range(0, 24)),
         "Pointe du matin (7h-9h)": [7, 8, 9],
