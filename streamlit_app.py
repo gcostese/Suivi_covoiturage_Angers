@@ -124,31 +124,28 @@ def main():
             [data-testid="stSidebar"] {
                 background-color: #EF7757;
             }
-            [data-testid="stSidebar"] .stText, 
-            [data-testid="stSidebar"] label, 
-            [data-testid="stSidebar"] .stMarkdown p {
+            /* Forcer le texte en blanc dans la sidebar */
+            [data-testid="stSidebar"] .stMarkdown p, 
+            [data-testid="stSidebar"] label {
                 color: white !important;
             }
 
-            /* 2. BOUTONS RADIO (CERCLE ET COULEUR DE SÉLECTION) */
-            /* Change la couleur du cercle quand il est coché */
-            div[data-testid="stRadio"] div[role="radiogroup"] input[壓te-checked="true"] + div div {
-                background-color: #292574 !important;
-            }
+            /* 2. BOUTONS RADIO : COULEUR BLEUE (#292574) */
             
-            /* Cible spécifiquement le cercle intérieur des boutons radio Streamlit */
-            div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] p {
-                color: #31333F; /* Garder le texte des options en sombre si hors sidebar */
+            /* Cible le cercle extérieur quand il est sélectionné */
+            div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] + div[aria-checked="true"] > div {
+                border-color: #292574 !important;
             }
 
-            /* 3. COULEUR PRIMAIRE GÉNÉRALE (Boutons, Sliders, Checkboxes) */
-            /* Cette règle force le bleu sur tous les éléments actifs */
-            :root {
-                --primary-color: #292574;
-            }
-            
-            .st-at {
+            /* Cible le point intérieur du bouton coché */
+            div[data-testid="stRadio"] input[checked] + div div {
                 background-color: #292574 !important;
+            }
+
+            /* Effet au survol (Optionnel) */
+            div[data-testid="stRadio"] label:hover div {
+                border-color: #292574 !important;
+            }
             }
         </style>
         """,
