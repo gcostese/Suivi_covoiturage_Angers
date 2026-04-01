@@ -350,7 +350,7 @@ def get_bivariate_color(taux, debit_norm):
 
     return f'rgb({final_r}, {final_g}, {final_b})'
 
-def plot_bivariate_legend(t_min, t_max):
+def plot_bivariate_legend(t_min=0, t_max=100):
     """Génère une matrice 10x10 servant de légende pour le heatmap bivarié."""
     grid_size = 10
     taux_display = np.linspace(t_min, t_max, grid_size)
