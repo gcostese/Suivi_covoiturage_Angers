@@ -138,11 +138,11 @@ def main():
     st.sidebar.header("⚙️ Configuration")
 
     # Choix de la maille temporelle
-    granularity = 'H'
+    granularity = 'h'
     #granularity = st.sidebar.selectbox(
     #    "Fréquence de regroupement :",
-    #    options=['H', 'D', 'W'], 
-    #    format_func=lambda x: {'H': 'Heure', 'D': 'Jour', 'W': 'Semaine'}[x]
+    #    options=['h', 'd', 'w'], 
+    #    format_func=lambda x: {'h': 'Heure', 'd': 'Jour', 'w': 'Semaine'}[x]
     #)
 
     selected_period_label = st.sidebar.selectbox(
