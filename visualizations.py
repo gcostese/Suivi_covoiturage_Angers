@@ -352,8 +352,9 @@ def get_bivariate_color(taux, debit_norm):
 
 def plot_bivariate_legend(t_min=0, t_max=100):
     """Génère une matrice 10x10 servant de légende pour le heatmap bivarié."""
+    t_min_plot = (t_min // 5) * 5
+    t_max_plot = ((t_max // 5) + 1) * 5
     grid_size = 10
-    taux_display = np.linspace(t_min, t_max, grid_size)
     taux_vals = np.linspace(0, 100, grid_size)
     debit_vals = np.linspace(0, 1, grid_size)
     
@@ -380,14 +381,14 @@ def plot_bivariate_legend(t_min=0, t_max=100):
                           fillcolor=color, line=dict(width=0))
 
     fig.update_layout(
-        title="Légende Bivariée",
-        xaxis_title="Taux (%)",
-        yaxis_title="Débit (Relatif)",
+        title="Légende",
+        xaxis_title="Taux de covoiturage (%)",
+        yaxis_title="Débit (relatif)",
         width=250, height=250,
-        margin=dict(l=40, r=20, t=40, b=40),
-        xaxis=dict(
-            tickvals=[t_min, (t_min+t_max)/2, t_max],
-            ticktext=[f"{t_min:.1f}%", f"{(t_min+t_max)/2:.1f}%", f"{t_max:.1f}%"]
+        margin=dict(l=40, r=20, t=60, b=40),
+        xaxis=dict(tickvals=[0, 50, 100],
+            ticktext=[f"{t_min_plot}%", f"{(t_min_plot+t_max_plot)/2:.1f}%", f"{t_max_plot}%"],
+            fixedrange=True
         ),
         yaxis=dict(tickvals=[0, 0.5, 1], ticktext=["Faible", "Moyen", "Fort"], fixedrange=True)
     )
@@ -403,7 +404,7 @@ def plot_heatmap_covoiturage_2d(df):
     df_heat['jour_nom'] = df_heat['datetime'].dt.day_name()
     jours_ordre = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     jours_traduits = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
-    
+
     # 1. Calcul des stats
     stats = df_heat.groupby(['jour_nom', 'heure']).agg(
         taux=('is_carpool', lambda x: x.mean() * 100),
@@ -413,8 +414,9 @@ def plot_heatmap_covoiturage_2d(df):
     # 2. Détermination des bornes réelles
     t_min = stats['taux'].min()
     t_max = stats['taux'].max()
-    # On évite la division par zéro si min == max
-    t_range = (t_max - t_min) if t_max > t_min else 1 
+    t_min_plot = (t_min // 5) * 5
+    t_max_plot = ((t_max // 5) + 1) * 5
+    t_range_plot = (t_max_plot - t_min_plot) if t_max_plot > t_min_plot else 1 
     
     # 3. Normalisation du débit (0 à 1)
     max_debit = stats['debit'].max()
@@ -423,7 +425,7 @@ def plot_heatmap_covoiturage_2d(df):
     # 4. Application de la couleur avec normalisation du taux
     def get_color_clamped(row):
         # On transforme le taux réel en une valeur de 0 à 100 relative aux bornes
-        taux_relatif = ((row['taux'] - t_min) / t_range) * 100
+        taux_relatif = ((row['taux'] - t_min_plot) / t_range_plot) * 100
         return get_bivariate_color(taux_relatif, row['debit_norm'])
 
     stats['color'] = stats.apply(get_color_clamped, axis=1)
@@ -434,10 +436,9 @@ def plot_heatmap_covoiturage_2d(df):
     pivot_debit = stats.pivot(index='jour_nom', columns='heure', values='debit').reindex(jours_ordre)
 
     fig = go.Figure(data=go.Heatmap(
-        z=[[i for i in range(24)] for j in range(7)], # Valeurs fictives pour la structure
+        z=[[i for i in range(24)] for j in range(7)],
         x=list(range(24)),
         y=jours_traduits,
-        coloraxis="coloraxis",
         showscale=False,
         customdata=np.dstack((pivot_taux, pivot_debit)),
         hovertemplate="<b>%{y} %{x}h</b><br>Taux : %{customdata[0]:.1f}%<br>Débit : %{customdata[1]} véh/h<extra></extra>"
@@ -453,10 +454,15 @@ def plot_heatmap_covoiturage_2d(df):
             fig.add_shape(type="rect", x0=c-0.5, y0=r-0.5, x1=c+0.5, y1=r+0.5, 
                           fillcolor=color, line=dict(width=0))
 
-    fig.update_layout(title="Intensité du covoiturage bivariée (taux VS débit)",
-                      xaxis_title="Heure de la journée", yaxis_title="Jour de la semaine",
-                      margin=dict(r=10),
-                      xaxis=dict(dtick=1), yaxis=dict(autorange="reversed"))
+    fig.update_layout(
+        title="Intensité du covoiturage bivariée (taux VS débit)",
+        xaxis_title="Heure de la journée",
+        yaxis_title="Jour de la semaine",
+        margin=dict(r=10, t=60),
+        xaxis=dict(dtick=1),
+        yaxis=dict(autorange="reversed"),
+        coloraxis_showscale=False
+        )
     
     return fig
 
