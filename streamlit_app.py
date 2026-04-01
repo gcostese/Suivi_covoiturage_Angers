@@ -129,24 +129,6 @@ def main():
             [data-testid="stSidebar"] label {
                 color: white !important;
             }
-
-            /* 2. BOUTONS RADIO : COULEUR BLEUE (#292574) */
-            
-            /* Cible le cercle extérieur quand il est sélectionné */
-            div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] + div[aria-checked="true"] > div {
-                border-color: #292574 !important;
-            }
-
-            /* Cible le point intérieur du bouton coché */
-            div[data-testid="stRadio"] input[checked] + div div {
-                background-color: #292574 !important;
-            }
-
-            /* Effet au survol (Optionnel) */
-            div[data-testid="stRadio"] label:hover div {
-                border-color: #292574 !important;
-            }
-            }
         </style>
         """,
         unsafe_allow_html=True
