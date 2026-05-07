@@ -151,7 +151,7 @@ def main():
 
     # ---- PARAMETRAGE ----
     st.sidebar.image("BlocMarque_RF-Cerema_horizontal.jpg", 
-                     use_container_width=True)
+                     width='stretch')
 
     # Sidebar pour les filtres
     st.sidebar.header("⚙️ Configuration")
@@ -218,7 +218,7 @@ def main():
     with col2:
         st.image("cd_42840474_animation.gif", 
                  caption="Exemple de véhicule avec 4 occupants détectés par le capteur (Crédit : Cerema)",
-                 use_container_width=True)
+                 width='stretch')
 
     st.divider()
 
@@ -228,7 +228,7 @@ def main():
     render_metrics(df_raw, df_f, df_res, nb_jours_select)
 
     st.write("Voici les 10 premières lignes :")
-    st.dataframe(df_raw.head(10), use_container_width=True)
+    st.dataframe(df_raw.head(10), width='stretch')
 
     st.divider() # Petite ligne de séparation
 
@@ -239,13 +239,13 @@ def main():
     with tab_dist:
         col1, col2 = st.columns(2)
         with col1:
-            st.plotly_chart(viz.plot_histogram_occupancy_with_perc(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+            st.plotly_chart(viz.plot_histogram_occupancy_with_perc(df_f), width='stretch', config=viz.PLOTLY_CONFIG, theme="streamlit")
         with col2:
-            st.plotly_chart(viz.plot_pie_carpool(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+            st.plotly_chart(viz.plot_pie_carpool(df_f), width='stretch', config=viz.PLOTLY_CONFIG, theme="streamlit")
 
     with tab_evol:
         st.subheader("Chroniques des flux (de véhicules et de personnes)")
-        st.plotly_chart(viz.plot_evolution_flux(df_res), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        st.plotly_chart(viz.plot_evolution_flux(df_res), width='stretch', config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         # Graphique Solo/Covoit (pré-calculé pour viz)
         df_stats = df_f.groupby([pd.Grouper(key='datetime', freq=granularity), 'type_vehicule'])['total_passengers'].sum().unstack(fill_value=0)
@@ -253,7 +253,7 @@ def main():
         df_stats = df_stats.reindex(full_range, fill_value=0)
         df_stats['Total'] = df_stats.sum(axis=1)
         st.plotly_chart(viz.plot_stacked_persons(df_stats.reset_index().rename(columns={'index': 'datetime'})), 
-                        use_container_width=True, 
+                        width='stretch', 
                         config=viz.PLOTLY_CONFIG, 
                         theme="streamlit"
                         )
@@ -262,7 +262,7 @@ def main():
         st.subheader("Évolution du taux de covoiturage")
         st.plotly_chart(
             viz.plot_rate_evolution(df_res, granularity, 'taux_covoiturage', "Taux de covoiturage", "Pourcentage"),
-            use_container_width=True, 
+            width='stretch', 
             theme="streamlit"
         )
 
@@ -270,7 +270,7 @@ def main():
         st.subheader("Évolution du taux d'occupation")
         st.plotly_chart(
             viz.plot_rate_evolution(df_res, granularity, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Pers/Véh"),
-            use_container_width=True, 
+            width='stretch', 
             theme="streamlit"
         )
 
@@ -282,29 +282,29 @@ def main():
             'occup_moy': 'occupation_moy'      # Pour plot_occupancy_vs_flow
         })
         
-        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_viz), use_container_width=True)
+        st.plotly_chart(viz.plot_hourly_profile_mixed(df_hour_viz), width='stretch')
 
         df_occ_flow = df_hour.rename(columns={
             'occup_moy': 'occupation_moy', 
             'debit_moyen': 'debit_moyen'
             })
-        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), use_container_width=True)
+        st.plotly_chart(viz.plot_occupancy_vs_flow(df_occ_flow), width='stretch')
 
         st.divider()
         st.subheader("Analyse des sièges vides")
-        st.plotly_chart(viz.plot_seat_efficiency(df_hour), use_container_width=True)
+        st.plotly_chart(viz.plot_seat_efficiency(df_hour), width='stretch')
 
     with tab_week:
-        st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), use_container_width=True, config=viz.PLOTLY_CONFIG, theme="streamlit")
+        st.plotly_chart(viz.plot_heatmap_covoiturage(df_f), width='stretch', config=viz.PLOTLY_CONFIG, theme="streamlit")
         
         # Analyse bivariée
         taux_series = df_f.groupby([df_f['datetime'].dt.day_name(), 'heure'])['is_carpool'].mean() * 100
         t_min, t_max = taux_series.min(), taux_series.max()
         col_chart, col_legend = st.columns([4, 1])
         with col_chart:
-            st.plotly_chart(viz.plot_heatmap_covoiturage_2d(df_f), use_container_width=True) 
+            st.plotly_chart(viz.plot_heatmap_covoiturage_2d(df_f), width='stretch') 
         with col_legend:
-            st.plotly_chart(viz.plot_bivariate_legend(t_min, t_max), use_container_width=True, config={'displayModeBar': False})
+            st.plotly_chart(viz.plot_bivariate_legend(t_min, t_max), width='stretch', config={'displayModeBar': False})
             st.info("La carte de chaleur bivariée utilise la couleur pour le taux et l'intensité pour le volume de trafic.")
     
     with tab_corr:
@@ -340,7 +340,7 @@ def main():
                         st.caption(f"Basé sur **{n_points}** points de mesure")
         except Exception as e:
             st.info(f"Les lignes de tendance ne sont pas disponibles pour cet affichage. \\ Erreur : {e}")
-        st.plotly_chart(fig_corr, use_container_width=True)
+        st.plotly_chart(fig_corr, width='stretch')
 
     # --- FOOTER ---
     st.subheader("🚀 Aller plus loin")
