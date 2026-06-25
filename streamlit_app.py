@@ -156,9 +156,9 @@ def main():
 
     st.sidebar.header("📍 Sommaire")
     st.sidebar.markdown("""
-    * [Aperçu des données](#aperçu-du-jeu-de-données)
-    * [Datavisualisation](#datavisualisation)
-    * [Aller plus loin](#aller-plus-loin)
+    * [Aperçu des données](#apercu)
+    * [Datavisualisation](#dataviz)
+    * [Aller plus loin](#plusloin)
     """)
     st.sidebar.divider() # Ligne de séparation visuelle avant les filtres
 
@@ -232,8 +232,7 @@ def main():
     st.divider()
 
     # --- APERÇU DES DONNÉES ---
-    st.subheader("👀 Aperçu du jeu de données")
-
+    st.markdown("<h2 id='apercu'>👀 Aperçu du jeu de données</h2>", unsafe_allow_html=True)
     render_metrics(df_raw, df_f, df_res, nb_jours_select)
 
     st.write("Voici les 10 premières lignes :")
@@ -242,7 +241,7 @@ def main():
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    st.subheader("🖥️ Datavisualisation")
+    st.markdown("<h2 id='dataviz'>🖥️ Datavisualisation</h2>", unsafe_allow_html=True)
     tab_dist, tab_evol, tab_hour, tab_week, tab_corr = st.tabs(["📊 Distribution", "📈 Évolution", "🕒 Profil horaire", "📅 Profil hebdomadaire", "🔀 Corrélation"])
 
     with tab_dist:
@@ -352,7 +351,7 @@ def main():
         st.plotly_chart(fig_corr, width='stretch')
 
     # --- FOOTER ---
-    st.subheader("🚀 Aller plus loin")
+    st.markdown("<h2 id='plusloin'>🚀 Aller plus loin</h2>", unsafe_allow_html=True)
 
     # Aperçu des données agrégées
     with st.expander("Voir les données agrégées"):
