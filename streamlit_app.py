@@ -154,6 +154,14 @@ def main():
     st.sidebar.image("BlocMarque_RF-Cerema_horizontal.jpg", 
                      width='stretch')
 
+    st.sidebar.header("📍 Sommaire")
+    st.sidebar.markdown("""
+    * [👀 Aperçu des données](#aper-u-du-jeu-de-donn-es)
+    * [🖥️ Datavisualisation](#datavisualisation)
+    * [🚀 Aller plus loin](#aller-plus-loin)
+    """)
+    st.sidebar.divider() # Ligne de séparation visuelle avant les filtres
+
     # Sidebar pour les filtres
     st.sidebar.header("⚙️ Configuration")
 
