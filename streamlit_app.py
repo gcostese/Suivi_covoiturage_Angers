@@ -156,9 +156,9 @@ def main():
 
     st.sidebar.header("📍 Sommaire")
     st.sidebar.markdown("""
-    * [👀 Aperçu des données](#aper-u-du-jeu-de-donn-es)
-    * [🖥️ Datavisualisation](#datavisualisation)
-    * [🚀 Aller plus loin](#aller-plus-loin)
+    * [Aperçu des données](#aper-u-du-jeu-de-donn-es)
+    * [Datavisualisation](#datavisualisation)
+    * [Aller plus loin](#aller-plus-loin)
     """)
     st.sidebar.divider() # Ligne de séparation visuelle avant les filtres
 
