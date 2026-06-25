@@ -156,7 +156,7 @@ def main():
 
     st.sidebar.header("📍 Sommaire")
     st.sidebar.markdown("""
-    * [Aperçu des données](#aper-u-du-jeu-de-donn-es)
+    * [Aperçu des données](#aperçu-du-jeu-de-données)
     * [Datavisualisation](#datavisualisation)
     * [Aller plus loin](#aller-plus-loin)
     """)
