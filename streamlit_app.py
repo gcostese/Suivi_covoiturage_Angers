@@ -156,10 +156,13 @@ def main():
 
     st.sidebar.header("📍 Sommaire")
     st.sidebar.markdown("""
-    * [Aperçu des données](#apercu)
-    * [Datavisualisation](#dataviz)
-    * [Aller plus loin](#plusloin)
-    """)
+    <ul>
+        <li><a href="#apercu" onclick="document.getElementById('apercu').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">👀 Aperçu des données</a></li>
+        <li style="margin-top: 10px;"><a href="#dataviz" onclick="document.getElementById('dataviz').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">🖥️ Datavisualisation</a></li>
+        <li style="margin-top: 10px;"><a href="#plusloin" onclick="document.getElementById('plusloin').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">🚀 Aller plus loin</a></li>
+    </ul>
+    """, unsafe_allow_html=True)
+
     st.sidebar.divider() # Ligne de séparation visuelle avant les filtres
 
     # Sidebar pour les filtres
