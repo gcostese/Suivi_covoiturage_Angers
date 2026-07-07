@@ -196,7 +196,7 @@ def plot_seat_efficiency(df_hour):
     
     return fig
 
-def plot_rate_evolution(df_resampled, granularity, column, title, y_label, y_min=None, y_max=None):
+def plot_rate_evolution(df_resampled, granularity, column, title, y_label, y_min=None):
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
     full_range = pd.date_range(start=df_resampled.index.min(), end=df_resampled.index.max(), freq=granularity)
     df_resampled = df_resampled.reindex(full_range)
@@ -211,8 +211,9 @@ def plot_rate_evolution(df_resampled, granularity, column, title, y_label, y_min
         labels={column: y_label, 'datetime': 'Temps'}
     ) 
     fig.update_traces(connectgaps=False)
-    if y_min is not None or y_max is not None:
-        fig.update_yaxes(range=[y_min, y_max])
+    if y_min is not None:
+        max_val = df_plot[column].max()
+        fig.update_yaxes(range=[y_min, max_val * 1.1])
     return fig
 
 def plot_hourly_profile_mixed(df_par_heure):
