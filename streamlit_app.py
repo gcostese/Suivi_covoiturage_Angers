@@ -280,7 +280,7 @@ def main():
         st.divider()
         st.subheader("Évolution du taux d'occupation")
         st.plotly_chart(
-            viz.plot_rate_evolution(df_res, granularity, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Pers/Véh"),
+            viz.plot_rate_evolution(df_res, granularity, 'taux_occupation_moyen', "Occupation moyenne par véhicule", "Personne/véhicule", y_min=1),
             width='stretch', 
             theme="streamlit"
         )
