@@ -200,7 +200,7 @@ def plot_rate_evolution(df_resampled, granularity, column, title, y_label, y_min
     """Générateur générique pour les graphiques d'évolution (Taux covoit ou Occupation)."""
     full_range = pd.date_range(start=df_resampled.index.min(), end=df_resampled.index.max(), freq=granularity)
     df_resampled = df_resampled.reindex(full_range)
-    df_plot = df_resampled.reset_index().rename(columns={'index': 'datetime'})
+    df_plot = df_resampled.reset_index(names=['datetime'])
     df_plot['datetime'] = pd.to_datetime(df_plot['datetime'])
     df_plot[column] = df_plot[column].fillna(0)
     fig = px.area(
@@ -213,7 +213,8 @@ def plot_rate_evolution(df_resampled, granularity, column, title, y_label, y_min
     fig.update_traces(connectgaps=False)
     if y_min is not None:
         max_val = df_plot[column].max()
-        fig.update_yaxes(range=[y_min, max_val * 1.1])
+        if pd.notna(max_val):
+            fig.update_yaxes(range=[y_min, max_val * 1.1])
     return fig
 
 def plot_hourly_profile_mixed(df_par_heure):

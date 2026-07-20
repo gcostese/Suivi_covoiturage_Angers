@@ -145,7 +145,7 @@ def main():
     
     # ---- CHARGEMENT DES DONNÉES ----
     try:
-        df_raw = load_data('donnees_angers.parquet')
+        df_raw = load_data('donnees_covoiturage_angers.parquet')
     except FileNotFoundError:
         st.error("Le fichier de données n'a pas été trouvé.")
         st.stop()
