@@ -68,8 +68,6 @@ def fmt_fr(val, decimal=0):
 def render_header():
     st.title("🚗👥 Analyse des données de covoiturage sur Angers")
 
-    st.warning('A la suite de la dégradation volontaire du capteur, les données ne sont plus disponibles depuis le **23/09/2026** !', icon="⚠️")
-
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
         st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** de la société [Invision AI](https://invision.ai/) 
@@ -128,9 +126,17 @@ def main():
             [data-testid="stSidebar"] {
                 background-color: #EF7757;
             }
+            [data-testid="stMain"],
+            [data-testid="stAppViewContainer"],
+            section.main,
+            .main {
+                scroll-behavior: smooth;
+            }
             /* Forcer le texte en blanc dans la sidebar */
             [data-testid="stSidebar"] .stMarkdown p, 
-            [data-testid="stSidebar"] label {
+            [data-testid="stSidebar"] h1,
+            [data-testid="stSidebar"] h2,
+            [data-testid="stSidebar"] h3 {
                 color: white !important;
             }
         </style>
@@ -159,10 +165,10 @@ def main():
 
     st.sidebar.header("📍 Sommaire")
     st.sidebar.markdown("""
-    <ul>
-        <li><a href="#apercu" onclick="document.getElementById('apercu').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">👀 Aperçu des données</a></li>
-        <li style="margin-top: 10px;"><a href="#dataviz" onclick="document.getElementById('dataviz').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">🖥️ Datavisualisation</a></li>
-        <li style="margin-top: 10px;"><a href="#plusloin" onclick="document.getElementById('plusloin').scrollIntoView({behavior: 'smooth'}); return false;" style="color: white; text-decoration: none;">🚀 Aller plus loin</a></li>
+    <ul style="list-style: none; padding-left: 0;">
+        <li><a href="#apercu" target="_self" style="color: white; text-decoration: none;">👀 Aperçu des données</a></li>
+        <li style="margin-top: 10px;"><a href="#dataviz" target="_self" style="color: white; text-decoration: none;">🖥️ Datavisualisation</a></li>
+        <li style="margin-top: 10px;"><a href="#plusloin" target="_self" style="color: white; text-decoration: none;">🚀 Aller plus loin</a></li>
     </ul>
     """, unsafe_allow_html=True)
 
@@ -238,16 +244,19 @@ def main():
     st.divider()
 
     # --- APERÇU DES DONNÉES ---
-    st.markdown("<h2 id='apercu'>👀 Aperçu du jeu de données</h2>", unsafe_allow_html=True)
+    st.header("👀 Aperçu du jeu de données", anchor="apercu")
     render_metrics(df_raw, df_f, df_res, nb_jours_select)
 
     st.write("Voici les 10 premières lignes :")
     st.dataframe(df_raw.head(10), width='stretch')
 
+    # WARNING : données indisponibles
+    st.warning('A la suite de la dégradation volontaire du capteur, les données ne sont plus disponibles depuis le **23/09/2026** !', icon="⚠️")
+
     st.divider() # Petite ligne de séparation
 
     # --- TRAITEMENT DES DONNÉES ---
-    st.markdown("<h2 id='dataviz'>🖥️ Datavisualisation</h2>", unsafe_allow_html=True)
+    st.header("🖥️ Datavisualisation", anchor="dataviz")
     tab_dist, tab_evol, tab_hour, tab_week, tab_corr = st.tabs(["📊 Distribution", "📈 Évolution", "🕒 Profil horaire", "📅 Profil hebdomadaire", "🔀 Corrélation"])
 
     with tab_dist:
@@ -357,7 +366,7 @@ def main():
         st.plotly_chart(fig_corr, width='stretch')
 
     # --- FOOTER ---
-    st.markdown("<h2 id='plusloin'>🚀 Aller plus loin</h2>", unsafe_allow_html=True)
+    st.header("🚀 Aller plus loin", anchor="plusloin")
 
     # Aperçu des données agrégées
     with st.expander("Voir les données agrégées"):
