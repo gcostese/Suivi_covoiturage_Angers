@@ -67,6 +67,9 @@ def fmt_fr(val, decimal=0):
 # --- SECTIONS DE L'INTERFACE ---
 def render_header():
     st.title("🚗👥 Analyse des données de covoiturage sur Angers")
+
+    st.warning('A la suite de la dégradation volontaire du capteur, les données ne sont plus disponibles depuis le **23/09/2026** !', icon="⚠️")
+
     with st.expander("ℹ️ À propos de ce projet", expanded=True):
         st.markdown("""
             Ce tableau de bord présente les données issues d'un **capteur de covoiturage** de la société [Invision AI](https://invision.ai/) 
