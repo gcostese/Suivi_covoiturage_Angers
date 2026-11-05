@@ -134,6 +134,7 @@ def main():
             }
             /* Forcer le texte en blanc dans la sidebar */
             [data-testid="stSidebar"] .stMarkdown p, 
+            [data-testid="stSidebar"] label,
             [data-testid="stSidebar"] h1,
             [data-testid="stSidebar"] h2,
             [data-testid="stSidebar"] h3 {
