@@ -35,7 +35,14 @@ PLOTLY_CONFIG = {
 def plot_sensor_map(lat=47.463791, lon=-0.638287):
     """Génère une carte interactive Folium centrée sur le capteur."""
     # Création de la carte de base (fond clair pour la lisibilité)
-    m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True, tiles="cartodbpositron")
+    m = folium.Map(location=[lat, lon], zoom_start=15, control_scale=True, tiles=None, prefer_canvas=True)
+
+    folium.TileLayer(
+        tiles='https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+        attr='&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        name='OSM France',
+        max_zoom=20,
+    ).add_to(m)
     
     # Ajout d'un marqueur personnalisé
     folium.Marker(
