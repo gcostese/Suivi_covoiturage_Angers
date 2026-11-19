@@ -252,7 +252,7 @@ def main():
     st.dataframe(df_raw.head(10), width='stretch')
 
     # WARNING : données indisponibles
-    st.warning('A la suite de la dégradation volontaire du capteur, les données ne sont plus disponibles depuis le **23/09/2026** !', icon="⚠️")
+    st.warning('A la suite de la dégradation volontaire du capteur, les données ne sont pas disponibles entre le **23/09/2026** et le **18/11/2026** !', icon="⚠️")
 
     st.success('Le capteur est de nouveau opérationnel depuis le **19/11/2026** !', icon="✅")
 

@@ -5,11 +5,6 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import matplotlib.colors as mcolors
 import folium
-from streamlit_folium import folium_static
-try:
-    import statsmodels
-except ImportError:
-    pass
 
 # Configuration centralisée des couleurs pour la cohérence visuelle
 COLORS = {
